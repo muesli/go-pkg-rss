@@ -1,0 +1,23 @@
+ Author: jim teeuwen <jimteeuwen@gmail.com>
+ Dependencies: go-pkg-xmlx (http://github.com/jteeuwen/go-pkg-xmlx)
+
+ This package allows us to fetch Rss and Atom feeds from the internet.
+ They are parsed into an object tree which is a hyvrid of both the RSS and Atom
+ standards.
+
+ Supported feeds are:
+ 	- Rss v0.91, 0.91 and 2.0
+ 	- Atom 1.0
+
+ The package allows us to maintain cache timeout management. This prevents us
+ from querying the servers for feed updates too often and risk ip bams. Appart 
+ from setting a cache timeout manually, the package also optionally adheres to
+ the TTL, SkipDays and SkipHours values specied in the feeds themselves.
+
+ Note that the TTL, SkipDays and SkipHour fields are only part of the RSS spec.
+ For Atom feeds, we use the CacheTimeout in the Feed struct.
+
+ Because the object structure is a hybrid between both RSS and Atom specs, not
+ all fields will be filled when requesting either an RSS or Atom feed. I have
+ tried to create as many shared fields as possiblem but some of them simply do
+ not occur in either the RSS or Atom spec.
