@@ -6,7 +6,7 @@
  standards.
 
  Supported feeds are:
- 	- Rss v0.91, 0.91 and 2.0
+ 	- Rss v0.91, 0.92 and 2.0
  	- Atom 1.0
 
  The package allows us to maintain cache timeout management. This prevents us
