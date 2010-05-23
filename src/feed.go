@@ -15,7 +15,7 @@
  	- Atom 1.0
 
  The package allows us to maintain cache timeout management. This prevents us
- from querying the servers for feed updates too often and risk ip bams. Appart 
+ from querying the servers for feed updates too often and risk ip bams. Appart
  from setting a cache timeout manually, the package also optionally adheres to
  the TTL, SkipDays and SkipHours values specied in the feeds themselves.
 
@@ -31,100 +31,106 @@ package feeder
 
 import "os"
 import "http"
-import "io"
 import "time"
 import "xmlx"
 import "fmt"
 import "strconv"
 import "strings"
+import "io/ioutil"
 
 type Feed struct {
 	// Custom cache timeout in minutes.
-	CacheTimeout int;
+	CacheTimeout int
 
 	// Make sure we adhere to the cache timeout specified in the feed. If
 	// our CacheTimeout is higher than that, we will use that instead.
-	EnforceCacheLimit bool;
+	EnforceCacheLimit bool
 
 	// Type of feed. Rss, Atom, etc
-	Type string;
+	Type string
 
 	// Version of the feed. Major and Minor.
-	Version	[2]int;
+	Version [2]int
 
 	// Channels with content.
-	Channels []Channel;
+	Channels []Channel
 
 	// Url from which this feed was created.
-	Url string;
+	Url string
 
 	// Last time content was fetched. Used in conjunction with CacheTimeout
 	// to ensure we don't get content too often.
-	lastupdate int64;
+	lastupdate int64
 }
 
 func New(cachetimeout int, enforcecachelimit bool) *Feed {
 	return &Feed{
-		CacheTimeout: cachetimeout,
+		CacheTimeout:      cachetimeout,
 		EnforceCacheLimit: enforcecachelimit,
-		Type: "none",
-		Version: [2]int{0, 0},
-		Channels: make([]Channel, 0),
+		Type:              "none",
+		Version:           [2]int{0, 0},
+		Channels:          make([]Channel, 0),
 	}
 }
 
 func (this *Feed) addChannel(ch Channel) {
-	slice := make([]Channel, len(this.Channels) + 1);
-	for i,v := range this.Channels {
-		slice[i] = v;
+	slice := make([]Channel, len(this.Channels)+1)
+	for i, v := range this.Channels {
+		slice[i] = v
 	}
-	slice[len(slice) - 1] = ch;
-	this.Channels = slice;
+	slice[len(slice)-1] = ch
+	this.Channels = slice
 }
 
 func (this *Feed) Fetch(uri string) (err os.Error) {
-	if !this.canUpdate() { return }
+	if !this.canUpdate() {
+		return
+	}
 
 	// Fetch data from remote location.
-	r, _, err := http.Get(uri);
-	if err != nil { return }
+	r, _, err := http.Get(uri)
+	if err != nil {
+		return
+	}
 
-	defer r.Body.Close();
+	defer r.Body.Close()
 
-	b, err := io.ReadAll(r.Body);
-	if err != nil { return }
-	content := string(b);
+	var b []byte
+	if b, err = ioutil.ReadAll(r.Body); err != nil {
+		return
+	}
 
-	this.Url = uri;
+	this.Url = uri
 
 	// Extract type and version of the feed so we can have the appropriate
 	// function parse it (rss 0.91, rss 0.92, rss 2, atom etc).
-	doc := xmlx.New();
-	err = doc.LoadString(content);
-	if err != nil { return }
-	this.Type, this.Version = this.GetVersionInfo(doc);
+	doc := xmlx.New()
+	if err = doc.LoadString(string(b)); err != nil {
+		return
+	}
+	this.Type, this.Version = this.GetVersionInfo(doc)
 
-	ok := this.testVersions();
-	if !ok {
-		err = os.NewError(fmt.Sprintf("Unsupported feed: %s, version: %+v", this.Type, this.Version));
-		return;
+	if ok := this.testVersions(); !ok {
+		err = os.NewError(fmt.Sprintf("Unsupported feed: %s, version: %+v", this.Type, this.Version))
+		return
 	}
 
-	err = this.buildFeed(doc);
-	if err != nil || len(this.Channels) == 0 { return }
+	if err = this.buildFeed(doc); err != nil || len(this.Channels) == 0 {
+		return
+	}
 
 	// reset cache timeout values according to feed specified values (TTL)
-	if  this.EnforceCacheLimit && this.CacheTimeout < this.Channels[0].TTL {
-		this.CacheTimeout = this.Channels[0].TTL;
+	if this.EnforceCacheLimit && this.CacheTimeout < this.Channels[0].TTL {
+		this.CacheTimeout = this.Channels[0].TTL
 	}
-	return;
+	return
 }
 
 func (this *Feed) canUpdate() bool {
 	// Make sure we are not within the specified cache-limit.
 	// This ensures we don't request data too often.
-	utc := time.UTC();
-	if utc.Seconds() - this.lastupdate < int64(this.CacheTimeout * 60) {
+	utc := time.UTC()
+	if utc.Seconds()-this.lastupdate < int64(this.CacheTimeout*60) {
 		return false
 	}
 
@@ -132,7 +138,7 @@ func (this *Feed) canUpdate() bool {
 	// we can update.
 	if len(this.Channels) == 0 && this.Type == "rss" {
 		if this.EnforceCacheLimit && len(this.Channels[0].SkipDays) > 0 {
-			for _ ,v := range this.Channels[0].SkipDays {
+			for _, v := range this.Channels[0].SkipDays {
 				if v == utc.Weekday {
 					return false
 				}
@@ -140,7 +146,7 @@ func (this *Feed) canUpdate() bool {
 		}
 
 		if this.EnforceCacheLimit && len(this.Channels[0].SkipHours) > 0 {
-			for _ ,v := range this.Channels[0].SkipHours {
+			for _, v := range this.Channels[0].SkipHours {
 				if v == utc.Hour {
 					return false
 				}
@@ -148,14 +154,16 @@ func (this *Feed) canUpdate() bool {
 		}
 	}
 
-	this.lastupdate = utc.Seconds();	
+	this.lastupdate = utc.Seconds()
 	return true
 }
 
 func (this *Feed) buildFeed(doc *xmlx.Document) (err os.Error) {
 	switch this.Type {
-	case "rss": err = this.readRss2(doc);
-	case "atom": err = this.readAtom(doc);
+	case "rss":
+		err = this.readRss2(doc)
+	case "atom":
+		err = this.readAtom(doc)
 	}
 	return
 }
@@ -176,30 +184,33 @@ func (this *Feed) testVersions() bool {
 		return false
 	}
 
-	return true;
+	return true
 }
 
 func (this *Feed) GetVersionInfo(doc *xmlx.Document) (ftype string, fversion [2]int) {
-	node := doc.SelectNode("http://www.w3.org/2005/Atom", "feed");
-	if node == nil { goto rss }
-	ftype = "atom";
-	fversion = [2]int{1, 0};
-	return;
+	node := doc.SelectNode("http://www.w3.org/2005/Atom", "feed")
+	if node == nil {
+		goto rss
+	}
+	ftype = "atom"
+	fversion = [2]int{1, 0}
+	return
 
-    rss:
-	node = doc.SelectNode("", "rss");
-	if node == nil { goto end }
-	ftype = "rss";
-	version := node.GetAttr("", "version");
-	p := strings.Index(version, ".");
-	major, _ := strconv.Atoi(version[0:p]);
-	minor, _ := strconv.Atoi(version[p+1 : len(version)]);
-	fversion = [2]int{major, minor};
-	return;
+rss:
+	node = doc.SelectNode("", "rss")
+	if node == nil {
+		goto end
+	}
+	ftype = "rss"
+	version := node.GetAttr("", "version")
+	p := strings.Index(version, ".")
+	major, _ := strconv.Atoi(version[0:p])
+	minor, _ := strconv.Atoi(version[p+1 : len(version)])
+	fversion = [2]int{major, minor}
+	return
 
-    end:
-	ftype = "unknown";
-	fversion = [2]int{0, 0};
-	return;
+end:
+	ftype = "unknown"
+	fversion = [2]int{0, 0}
+	return
 }
-

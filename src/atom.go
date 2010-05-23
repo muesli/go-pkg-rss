@@ -4,94 +4,93 @@ import "os"
 import "xmlx"
 
 func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
-	ns := "http://www.w3.org/2005/Atom";
-	channels := doc.SelectNodes(ns, "feed");
+	ns := "http://www.w3.org/2005/Atom"
+	channels := doc.SelectNodes(ns, "feed")
 	for _, node := range channels {
-		ch := Channel{};
-		ch.Title = node.GetValue(ns, "title");
-		ch.LastBuildDate = node.GetValue(ns, "updated");
-		ch.Id = node.GetValue(ns, "id");
-		ch.Rights = node.GetValue(ns, "rights");
+		ch := Channel{}
+		ch.Title = node.GetValue(ns, "title")
+		ch.LastBuildDate = node.GetValue(ns, "updated")
+		ch.Id = node.GetValue(ns, "id")
+		ch.Rights = node.GetValue(ns, "rights")
 
-		list := node.SelectNodes(ns, "link");
-		ch.Links = make([]Link, len(list));
+		list := node.SelectNodes(ns, "link")
+		ch.Links = make([]Link, len(list))
 		for i, v := range list {
-			ch.Links[i].Href = v.GetAttr("", "href");
-			ch.Links[i].Rel = v.GetAttr("", "rel");
-			ch.Links[i].Type = v.GetAttr("", "type");
-			ch.Links[i].HrefLang = v.GetAttr("", "hreflang");
+			ch.Links[i].Href = v.GetAttr("", "href")
+			ch.Links[i].Rel = v.GetAttr("", "rel")
+			ch.Links[i].Type = v.GetAttr("", "type")
+			ch.Links[i].HrefLang = v.GetAttr("", "hreflang")
 
 		}
 
-		tn := node.SelectNode(ns, "subtitle");
+		tn := node.SelectNode(ns, "subtitle")
 		if tn != nil {
-			ch.SubTitle = SubTitle{};
-			ch.SubTitle.Type = tn.GetAttr("", "type");
-			ch.SubTitle.Text = tn.Value;
+			ch.SubTitle = SubTitle{}
+			ch.SubTitle.Type = tn.GetAttr("", "type")
+			ch.SubTitle.Text = tn.Value
 		}
 
-		tn = node.SelectNode(ns, "generator");
+		tn = node.SelectNode(ns, "generator")
 		if tn != nil {
-			ch.Generator = Generator{};
-			ch.Generator.Uri = tn.GetAttr("", "uri");
-			ch.Generator.Version = tn.GetAttr("", "version");
-			ch.Generator.Text = tn.Value;
+			ch.Generator = Generator{}
+			ch.Generator.Uri = tn.GetAttr("", "uri")
+			ch.Generator.Version = tn.GetAttr("", "version")
+			ch.Generator.Text = tn.Value
 		}
 
-		tn = node.SelectNode(ns, "author");
+		tn = node.SelectNode(ns, "author")
 		if tn != nil {
-			ch.Author = Author{};
-			ch.Author.Name = tn.GetValue("", "name");
-			ch.Author.Uri = tn.GetValue("", "uri");
-			ch.Author.Email = tn.GetValue("", "email");
+			ch.Author = Author{}
+			ch.Author.Name = tn.GetValue("", "name")
+			ch.Author.Uri = tn.GetValue("", "uri")
+			ch.Author.Email = tn.GetValue("", "email")
 		}
 
-		list = node.SelectNodes(ns, "entry");
-		ch.Items = make([]Item, len(list));
+		list = node.SelectNodes(ns, "entry")
+		ch.Items = make([]Item, len(list))
 		for _, v := range list {
-			item := Item{};
-			item.Title = v.GetValue(ns, "title");
-			item.Id = v.GetValue(ns, "id");
-			item.PubDate = v.GetValue(ns, "updated");
-			item.Description = v.GetValue(ns, "summary");
+			item := Item{}
+			item.Title = v.GetValue(ns, "title")
+			item.Id = v.GetValue(ns, "id")
+			item.PubDate = v.GetValue(ns, "updated")
+			item.Description = v.GetValue(ns, "summary")
 
-			list = v.SelectNodes(ns, "link");
-			item.Links = make([]Link, 0);
+			list = v.SelectNodes(ns, "link")
+			item.Links = make([]Link, 0)
 			for _, lv := range list {
 				if tn.GetAttr(ns, "rel") == "enclosure" {
-					enc := Enclosure{};
-					enc.Url = lv.GetAttr("", "href");
-					enc.Type = lv.GetAttr("", "type");
-					item.addEnclosure(enc);
+					enc := Enclosure{}
+					enc.Url = lv.GetAttr("", "href")
+					enc.Type = lv.GetAttr("", "type")
+					item.addEnclosure(enc)
 				} else {
-					lnk := Link{};
-					lnk.Href = lv.GetAttr("", "href");
-					lnk.Rel = lv.GetAttr("", "rel");
-					lnk.Type = lv.GetAttr("", "type");
-					lnk.HrefLang = lv.GetAttr("", "hreflang");
-					item.addLink(lnk);
+					lnk := Link{}
+					lnk.Href = lv.GetAttr("", "href")
+					lnk.Rel = lv.GetAttr("", "rel")
+					lnk.Type = lv.GetAttr("", "type")
+					lnk.HrefLang = lv.GetAttr("", "hreflang")
+					item.addLink(lnk)
 				}
 			}
 
-			list = v.SelectNodes(ns, "contributor");
-			item.Contributors = make([]string, len(list));
+			list = v.SelectNodes(ns, "contributor")
+			item.Contributors = make([]string, len(list))
 			for ci, cv := range list {
-				item.Contributors[ci] = cv.GetValue("", "name");
+				item.Contributors[ci] = cv.GetValue("", "name")
 			}
 
-			tn = v.SelectNode(ns, "content");
+			tn = v.SelectNode(ns, "content")
 			if tn != nil {
-				item.Content = Content{};
-				item.Content.Type = tn.GetAttr("", "type");
-				item.Content.Lang = tn.GetValue("xml", "lang");
-				item.Content.Base = tn.GetValue("xml", "base");
-				item.Content.Text = tn.Value;
+				item.Content = Content{}
+				item.Content.Type = tn.GetAttr("", "type")
+				item.Content.Lang = tn.GetValue("xml", "lang")
+				item.Content.Base = tn.GetValue("xml", "base")
+				item.Content.Text = tn.Value
 			}
-			ch.addItem(item);
+			ch.addItem(item)
 		}
 
-		this.addChannel(ch);
+		this.addChannel(ch)
 	}
 	return
 }
-

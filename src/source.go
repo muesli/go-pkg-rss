@@ -1,6 +1,6 @@
 package feeder
 
 type Source struct {
-	Url		string;
-	Text		string;
+	Url  string
+	Text string
 }
