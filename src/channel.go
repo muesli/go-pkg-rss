@@ -30,20 +30,15 @@ type Channel struct {
 }
 
 func (this *Channel) addItem(item Item) {
-	slice := make([]Item, len(this.Items)+1)
-	for i, v := range this.Items {
-		slice[i] = v
-	}
-	slice[len(slice)-1] = item
-	this.Items = slice
+	c := make([]Item, len(this.Items)+1)
+	copy(c, this.Items)
+	c[len(c)-1] = item
+	this.Items = c
 }
 
-
 func (this *Channel) addLink(l Link) {
-	slice := make([]Link, len(this.Links)+1)
-	for i, v := range this.Links {
-		slice[i] = v
-	}
-	slice[len(slice)-1] = l
-	this.Links = slice
+	c := make([]Link, len(this.Links)+1)
+	copy(c, this.Links)
+	c[len(c)-1] = l
+	this.Links = c
 }

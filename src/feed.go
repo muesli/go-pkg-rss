@@ -74,12 +74,10 @@ func New(cachetimeout int, enforcecachelimit bool) *Feed {
 }
 
 func (this *Feed) addChannel(ch Channel) {
-	slice := make([]Channel, len(this.Channels)+1)
-	for i, v := range this.Channels {
-		slice[i] = v
-	}
-	slice[len(slice)-1] = ch
-	this.Channels = slice
+	c := make([]Channel, len(this.Channels)+1)
+	copy(c, this.Channels)
+	c[len(c)-1] = ch
+	this.Channels = c
 }
 
 func (this *Feed) Fetch(uri string) (err os.Error) {

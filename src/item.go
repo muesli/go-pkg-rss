@@ -21,19 +21,15 @@ type Item struct {
 }
 
 func (this *Item) addEnclosure(e Enclosure) {
-	slice := make([]Enclosure, len(this.Enclosures)+1)
-	for i, v := range this.Enclosures {
-		slice[i] = v
-	}
-	slice[len(slice)-1] = e
-	this.Enclosures = slice
+	c := make([]Enclosure, len(this.Enclosures)+1)
+	copy(c, this.Enclosures)
+	c[len(c)-1] = e
+	this.Enclosures = c
 }
 
 func (this *Item) addLink(l Link) {
-	slice := make([]Link, len(this.Links)+1)
-	for i, v := range this.Links {
-		slice[i] = v
-	}
-	slice[len(slice)-1] = l
-	this.Links = slice
+	c := make([]Link, len(this.Links)+1)
+	copy(c, this.Links)
+	c[len(c)-1] = l
+	this.Links = c
 }

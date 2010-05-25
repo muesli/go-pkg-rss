@@ -20,7 +20,6 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
 			ch.Links[i].Rel = v.GetAttr("", "rel")
 			ch.Links[i].Type = v.GetAttr("", "type")
 			ch.Links[i].HrefLang = v.GetAttr("", "hreflang")
-
 		}
 
 		tn := node.SelectNode(ns, "subtitle")

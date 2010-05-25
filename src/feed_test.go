@@ -10,12 +10,14 @@ func TestFeed(t *testing.T) {
 		"http://blog.case.edu/news/feed.atom",
 	}
 
+	var feed *Feed
+	var err os.Error
+
 	for _, uri := range urilist {
-		feed := New(5, true)
-		err := feed.Fetch(uri)
-		if err != nil {
+		feed = New(5, true)
+
+		if err = feed.Fetch(uri); err != nil {
 			t.Errorf("%s >>> %s", uri, err)
-			continue
 		}
 	}
 }
