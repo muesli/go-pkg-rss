@@ -21,3 +21,10 @@
  all fields will be filled when requesting either an RSS or Atom feed. I have
  tried to create as many shared fields as possible but some of them simply do
  not occur in either the RSS or Atom spec.
+
+================================================================================
+ LICENSE
+================================================================================
+
+All code is subject to a 1-clause BSD license. See the LICENSE file for its
+contents.

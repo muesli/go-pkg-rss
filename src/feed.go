@@ -1,7 +1,3 @@
-// Copyright 2009 The Go Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file.
-
 /*
  Author: jim teeuwen <jimteeuwen@gmail.com>
  Dependencies: go-pkg-xmlx (http://github.com/jteeuwen/go-pkg-xmlx)
