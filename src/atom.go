@@ -6,14 +6,42 @@ import "xmlx"
 func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
 	ns := "http://www.w3.org/2005/Atom"
 	channels := doc.SelectNodes(ns, "feed")
+
+	getChan := func(id string) *Channel {
+		for _, c := range this.Channels {
+			if c.Id == id {
+				return c
+			}
+		}
+		return nil
+	}
+
+	haveItem := func(ch *Channel, id string) bool {
+		for _, item := range ch.Items {
+			if item.Id == id {
+				return true
+			}
+		}
+		return false
+	}
+
+	var ch *Channel
+	var i *Item
+	var tn *xmlx.Node
+	var list []*xmlx.Node
+
 	for _, node := range channels {
-		ch := Channel{}
+		if ch = getChan(node.GetValue("", "pubDate")); ch == nil {
+			ch = new(Channel)
+			this.Channels = append(this.Channels, ch)
+		}
+
 		ch.Title = node.GetValue(ns, "title")
 		ch.LastBuildDate = node.GetValue(ns, "updated")
 		ch.Id = node.GetValue(ns, "id")
 		ch.Rights = node.GetValue(ns, "rights")
 
-		list := node.SelectNodes(ns, "link")
+		list = node.SelectNodes(ns, "link")
 		ch.Links = make([]Link, len(list))
 		for i, v := range list {
 			ch.Links[i].Href = v.GetAttr("", "href")
@@ -22,8 +50,7 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
 			ch.Links[i].HrefLang = v.GetAttr("", "hreflang")
 		}
 
-		tn := node.SelectNode(ns, "subtitle")
-		if tn != nil {
+		if tn = node.SelectNode(ns, "subtitle"); tn != nil {
 			ch.SubTitle = SubTitle{}
 			ch.SubTitle.Type = tn.GetAttr("", "type")
 			ch.SubTitle.Text = tn.Value
@@ -43,50 +70,56 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
 			ch.Author.Email = tn.GetValue("", "email")
 		}
 
+		itemcount := len(ch.Items)
 		list = node.SelectNodes(ns, "entry")
-		ch.Items = make([]Item, len(list))
-		for _, v := range list {
-			item := Item{}
-			item.Title = v.GetValue(ns, "title")
-			item.Id = v.GetValue(ns, "id")
-			item.PubDate = v.GetValue(ns, "updated")
-			item.Description = v.GetValue(ns, "summary")
 
-			list = v.SelectNodes(ns, "link")
-			item.Links = make([]Link, 0)
-			for _, lv := range list {
+		for _, item := range list {
+			if haveItem(ch, item.GetValue("", "id")) {
+				continue
+			}
+
+			i = new(Item)
+			i.Title = item.GetValue(ns, "title")
+			i.Id = item.GetValue(ns, "id")
+			i.PubDate = item.GetValue(ns, "updated")
+			i.Description = item.GetValue(ns, "summary")
+
+			links := item.SelectNodes(ns, "link")
+			for _, lv := range links {
 				if tn.GetAttr(ns, "rel") == "enclosure" {
-					enc := Enclosure{}
+					enc := new(Enclosure)
 					enc.Url = lv.GetAttr("", "href")
 					enc.Type = lv.GetAttr("", "type")
-					item.Enclosures = append(item.Enclosures, enc)
+					i.Enclosures = append(i.Enclosures, enc)
 				} else {
-					lnk := Link{}
+					lnk := new(Link)
 					lnk.Href = lv.GetAttr("", "href")
 					lnk.Rel = lv.GetAttr("", "rel")
 					lnk.Type = lv.GetAttr("", "type")
 					lnk.HrefLang = lv.GetAttr("", "hreflang")
-					item.Links = append(item.Links, lnk)
+					i.Links = append(i.Links, lnk)
 				}
 			}
 
-			list = v.SelectNodes(ns, "contributor")
-			item.Contributors = make([]string, len(list))
-			for ci, cv := range list {
-				item.Contributors[ci] = cv.GetValue("", "name")
+			list = item.SelectNodes(ns, "contributor")
+			for _, cv := range list {
+				i.Contributors = append(i.Contributors, cv.GetValue("", "name"))
 			}
 
-			if tn = v.SelectNode(ns, "content"); tn != nil {
-				item.Content = Content{}
-				item.Content.Type = tn.GetAttr("", "type")
-				item.Content.Lang = tn.GetValue("xml", "lang")
-				item.Content.Base = tn.GetValue("xml", "base")
-				item.Content.Text = tn.Value
+			if tn = item.SelectNode(ns, "content"); tn != nil {
+				i.Content = new(Content)
+				i.Content.Type = tn.GetAttr("", "type")
+				i.Content.Lang = tn.GetValue("xml", "lang")
+				i.Content.Base = tn.GetValue("xml", "base")
+				i.Content.Text = tn.Value
 			}
-			ch.Items = append(ch.Items, item)
+
+			ch.Items = append(ch.Items, i)
 		}
 
-		this.Channels = append(this.Channels, ch)
+		if itemcount != len(ch.Items) && this.itemhandler != nil {
+			this.itemhandler(this, ch, ch.Items[itemcount:])
+		}
 	}
 	return
 }

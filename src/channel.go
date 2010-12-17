@@ -11,14 +11,14 @@ type Channel struct {
 	PubDate        string
 	LastBuildDate  string
 	Docs           string
-	Categories     []Category
+	Categories     []*Category
 	Generator      Generator
 	TTL            int
 	Rating         string
 	SkipHours      []int
 	SkipDays       []int
 	Image          Image
-	Items          []Item
+	Items          []*Item
 	Cloud          Cloud
 	TextInput      Input
 

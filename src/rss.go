@@ -4,13 +4,60 @@ import "os"
 import "xmlx"
 
 func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
+	days := make(map[string]int)
+	days["Monday"] = 1
+	days["Tuesday"] = 2
+	days["Wednesday"] = 3
+	days["Thursday"] = 4
+	days["Friday"] = 5
+	days["Saturday"] = 6
+	days["Sunday"] = 7
+
+	getChan := func(pubdate string) *Channel {
+		for _, c := range this.Channels {
+			if c.PubDate == pubdate {
+				return c
+			}
+		}
+		return nil
+	}
+
+	haveItem := func(ch *Channel, id, title, desc string) bool {
+		for _, item := range ch.Items {
+			switch {
+			case len(id) > 0:
+				if item.Id == id {
+					return true
+				}
+			case len(title) > 0:
+				if item.Title == title {
+					return true
+				}
+			default:
+				if item.Description == desc {
+					return true
+				}
+			}
+		}
+		return false
+	}
+
+	var ch *Channel
+	var i *Item
+	var n *xmlx.Node
+	var list, tl []*xmlx.Node
+
 	channels := doc.SelectNodes("", "channel")
 	for _, node := range channels {
-		ch := Channel{}
-		ch.Title = node.GetValue("", "title")
+		if ch = getChan(node.GetValue("", "pubDate")); ch == nil {
+			ch = new(Channel)
+			this.Channels = append(this.Channels, ch)
+		}
 
-		list := node.SelectNodes("", "link")
+		ch.Title = node.GetValue("", "title")
+		list = node.SelectNodes("", "link")
 		ch.Links = make([]Link, len(list))
+
 		for i, v := range list {
 			ch.Links[i].Href = v.Value
 		}
@@ -25,14 +72,14 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 		ch.Docs = node.GetValue("", "docs")
 
 		list = node.SelectNodes("", "category")
-		ch.Categories = make([]Category, len(list))
+		ch.Categories = make([]*Category, len(list))
 		for i, v := range list {
+			ch.Categories[i] = new(Category)
 			ch.Categories[i].Domain = v.GetAttr("", "domain")
 			ch.Categories[i].Text = v.Value
 		}
 
-		n := node.SelectNode("", "generator")
-		if n != nil {
+		if n = node.SelectNode("", "generator"); n != nil {
 			ch.Generator = Generator{}
 			ch.Generator.Text = n.Value
 		}
@@ -49,7 +96,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 		list = node.SelectNodes("", "days")
 		ch.SkipDays = make([]int, len(list))
 		for i, v := range list {
-			ch.SkipDays[i] = mapDay(v.Value)
+			ch.SkipDays[i] = days[v.Value]
 		}
 
 		if n = node.SelectNode("", "image"); n != nil {
@@ -78,16 +125,22 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 			ch.TextInput.Link = n.GetValue("", "link")
 		}
 
+		itemcount := len(ch.Items)
 		list = node.SelectNodes("", "item")
+
 		for _, item := range list {
-			i := Item{}
+			if haveItem(ch, item.GetValue("", "pubDate"),
+				item.GetValue("", "title"), item.GetValue("", "description")) {
+				continue
+			}
+
+			i = new(Item)
 			i.Title = item.GetValue("", "title")
 			i.Description = item.GetValue("", "description")
 
-			list = node.SelectNodes("", "link")
-			i.Links = make([]Link, 0)
-			for _, v := range list {
-				lnk := Link{}
+			tl = node.SelectNodes("", "link")
+			for _, v := range tl {
+				lnk := new(Link)
 				lnk.Href = v.Value
 				i.Links = append(i.Links, lnk)
 			}
@@ -101,24 +154,25 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 			i.Guid = item.GetValue("", "guid")
 			i.PubDate = item.GetValue("", "pubDate")
 
-			list := item.SelectNodes("", "category")
-			i.Categories = make([]Category, len(list))
-			for li, lv := range list {
-				i.Categories[li].Domain = lv.GetAttr("", "domain")
-				i.Categories[li].Text = lv.Value
+			tl = item.SelectNodes("", "category")
+			for _, lv := range tl {
+				cat := new(Category)
+				cat.Domain = lv.GetAttr("", "domain")
+				cat.Text = lv.Value
+				i.Categories = append(i.Categories, cat)
 			}
 
-			list = item.SelectNodes("", "enclosure")
-			i.Enclosures = make([]Enclosure, len(list))
-			for li, lv := range list {
-				i.Enclosures[li].Url = lv.GetAttr("", "url")
-				i.Enclosures[li].Length = lv.GetAttri64("", "length")
-				i.Enclosures[li].Type = lv.GetAttr("", "type")
+			tl = item.SelectNodes("", "enclosure")
+			for _, lv := range tl {
+				enc := new(Enclosure)
+				enc.Url = lv.GetAttr("", "url")
+				enc.Length = lv.GetAttri64("", "length")
+				enc.Type = lv.GetAttr("", "type")
+				i.Enclosures = append(i.Enclosures, enc)
 			}
 
-			src := item.SelectNode("", "source")
-			if src != nil {
-				i.Source = Source{}
+			if src := item.SelectNode("", "source"); src != nil {
+				i.Source = new(Source)
 				i.Source.Url = src.GetAttr("", "url")
 				i.Source.Text = src.Value
 			}
@@ -126,27 +180,9 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 			ch.Items = append(ch.Items, i)
 		}
 
-		this.Channels = append(this.Channels, ch)
+		if itemcount != len(ch.Items) && this.itemhandler != nil {
+			this.itemhandler(this, ch, ch.Items[itemcount:])
+		}
 	}
 	return
-}
-
-func mapDay(day string) int {
-	switch day {
-	case "Monday":
-		return 1
-	case "Tuesday":
-		return 2
-	case "Wednesday":
-		return 3
-	case "Thursday":
-		return 4
-	case "Friday":
-		return 5
-	case "Saturday":
-		return 6
-	case "Sunday":
-		return 7
-	}
-	return 1
 }

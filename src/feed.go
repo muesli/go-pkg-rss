@@ -32,6 +32,9 @@ import "fmt"
 import "strconv"
 import "strings"
 
+type ChannelHandler func(f *Feed, newchannels []*Channel)
+type ItemHandler func(f *Feed, ch *Channel, newitems []*Item)
+
 type Feed struct {
 	// Custom cache timeout in minutes.
 	CacheTimeout int
@@ -47,21 +50,31 @@ type Feed struct {
 	Version [2]int
 
 	// Channels with content.
-	Channels []Channel
+	Channels []*Channel
 
 	// Url from which this feed was created.
 	Url string
+
+	// A notification function, used to notify the host when a new channel
+	// has been found.
+	chanhandler ChannelHandler
+
+	// A notification function, used to notify the host when a new item
+	// has been found for a given channel.
+	itemhandler ItemHandler
 
 	// Last time content was fetched. Used in conjunction with CacheTimeout
 	// to ensure we don't get content too often.
 	lastupdate int64
 }
 
-func New(cachetimeout int, enforcecachelimit bool) *Feed {
+func New(cachetimeout int, enforcecachelimit bool, ch ChannelHandler, ih ItemHandler) *Feed {
 	v := new(Feed)
 	v.CacheTimeout = cachetimeout
 	v.EnforceCacheLimit = enforcecachelimit
 	v.Type = "none"
+	v.chanhandler = ch
+	v.itemhandler = ih
 	return v
 }
 
@@ -71,7 +84,6 @@ func (this *Feed) Fetch(uri string) (err os.Error) {
 	}
 
 	this.Url = uri
-	this.Channels = nil
 
 	// Extract type and version of the feed so we can have the appropriate
 	// function parse it (rss 0.91, rss 0.92, rss 2, atom etc).
@@ -86,14 +98,21 @@ func (this *Feed) Fetch(uri string) (err os.Error) {
 		return
 	}
 
+	chancount := len(this.Channels)
 	if err = this.buildFeed(doc); err != nil || len(this.Channels) == 0 {
 		return
+	}
+
+	// Notify host of new channels
+	if chancount != len(this.Channels) && this.chanhandler != nil {
+		this.chanhandler(this, this.Channels[chancount:])
 	}
 
 	// reset cache timeout values according to feed specified values (TTL)
 	if this.EnforceCacheLimit && this.CacheTimeout < this.Channels[0].TTL {
 		this.CacheTimeout = this.Channels[0].TTL
 	}
+
 	return
 }
 

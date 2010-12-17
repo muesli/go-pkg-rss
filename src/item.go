@@ -3,19 +3,19 @@ package feeder
 type Item struct {
 	// RSS and Shared fields
 	Title       string
-	Links       []Link
+	Links       []*Link
 	Description string
 	Author      Author
-	Categories  []Category
+	Categories  []*Category
 	Comments    string
-	Enclosures  []Enclosure
+	Enclosures  []*Enclosure
 	Guid        string
 	PubDate     string
-	Source      Source
+	Source      *Source
 
 	// Atom specific fields
 	Id           string
-	Generator    Generator
+	Generator    *Generator
 	Contributors []string
-	Content      Content
+	Content      *Content
 }
