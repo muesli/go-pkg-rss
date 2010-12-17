@@ -1,6 +1,7 @@
 package feeder
 
 import "testing"
+import "os"
 
 func TestFeed(t *testing.T) {
 	urilist := []string{

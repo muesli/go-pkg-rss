@@ -29,16 +29,14 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
 			ch.SubTitle.Text = tn.Value
 		}
 
-		tn = node.SelectNode(ns, "generator")
-		if tn != nil {
+		if tn = node.SelectNode(ns, "generator"); tn != nil {
 			ch.Generator = Generator{}
 			ch.Generator.Uri = tn.GetAttr("", "uri")
 			ch.Generator.Version = tn.GetAttr("", "version")
 			ch.Generator.Text = tn.Value
 		}
 
-		tn = node.SelectNode(ns, "author")
-		if tn != nil {
+		if tn = node.SelectNode(ns, "author"); tn != nil {
 			ch.Author = Author{}
 			ch.Author.Name = tn.GetValue("", "name")
 			ch.Author.Uri = tn.GetValue("", "uri")
@@ -61,14 +59,14 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
 					enc := Enclosure{}
 					enc.Url = lv.GetAttr("", "href")
 					enc.Type = lv.GetAttr("", "type")
-					item.addEnclosure(enc)
+					item.Enclosures = append(item.Enclosures, enc)
 				} else {
 					lnk := Link{}
 					lnk.Href = lv.GetAttr("", "href")
 					lnk.Rel = lv.GetAttr("", "rel")
 					lnk.Type = lv.GetAttr("", "type")
 					lnk.HrefLang = lv.GetAttr("", "hreflang")
-					item.addLink(lnk)
+					item.Links = append(item.Links, lnk)
 				}
 			}
 
@@ -78,18 +76,17 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
 				item.Contributors[ci] = cv.GetValue("", "name")
 			}
 
-			tn = v.SelectNode(ns, "content")
-			if tn != nil {
+			if tn = v.SelectNode(ns, "content"); tn != nil {
 				item.Content = Content{}
 				item.Content.Type = tn.GetAttr("", "type")
 				item.Content.Lang = tn.GetValue("xml", "lang")
 				item.Content.Base = tn.GetValue("xml", "base")
 				item.Content.Text = tn.Value
 			}
-			ch.addItem(item)
+			ch.Items = append(ch.Items, item)
 		}
 
-		this.addChannel(ch)
+		this.Channels = append(this.Channels, ch)
 	}
 	return
 }

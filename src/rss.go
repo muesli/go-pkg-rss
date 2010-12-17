@@ -52,8 +52,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 			ch.SkipDays[i] = mapDay(v.Value)
 		}
 
-		n = node.SelectNode("", "image")
-		if n != nil {
+		if n = node.SelectNode("", "image"); n != nil {
 			ch.Image.Title = n.GetValue("", "title")
 			ch.Image.Url = n.GetValue("", "url")
 			ch.Image.Link = n.GetValue("", "link")
@@ -62,8 +61,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 			ch.Image.Description = n.GetValue("", "description")
 		}
 
-		n = node.SelectNode("", "cloud")
-		if n != nil {
+		if n = node.SelectNode("", "cloud"); n != nil {
 			ch.Cloud = Cloud{}
 			ch.Cloud.Domain = n.GetAttr("", "domain")
 			ch.Cloud.Port = n.GetAttri("", "port")
@@ -72,8 +70,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 			ch.Cloud.Protocol = n.GetAttr("", "protocol")
 		}
 
-		n = node.SelectNode("", "textInput")
-		if n != nil {
+		if n = node.SelectNode("", "textInput"); n != nil {
 			ch.TextInput = Input{}
 			ch.TextInput.Title = n.GetValue("", "title")
 			ch.TextInput.Description = n.GetValue("", "description")
@@ -92,11 +89,10 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 			for _, v := range list {
 				lnk := Link{}
 				lnk.Href = v.Value
-				i.addLink(lnk)
+				i.Links = append(i.Links, lnk)
 			}
 
-			n = item.SelectNode("", "author")
-			if n != nil {
+			if n = item.SelectNode("", "author"); n != nil {
 				i.Author = Author{}
 				i.Author.Name = n.Value
 			}
@@ -127,10 +123,10 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 				i.Source.Text = src.Value
 			}
 
-			ch.addItem(i)
+			ch.Items = append(ch.Items, i)
 		}
 
-		this.addChannel(ch)
+		this.Channels = append(this.Channels, ch)
 	}
 	return
 }

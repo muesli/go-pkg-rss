@@ -26,13 +26,11 @@
 package feeder
 
 import "os"
-import "http"
 import "time"
 import "xmlx"
 import "fmt"
 import "strconv"
 import "strings"
-import "io/ioutil"
 
 type Feed struct {
 	// Custom cache timeout in minutes.
@@ -60,46 +58,25 @@ type Feed struct {
 }
 
 func New(cachetimeout int, enforcecachelimit bool) *Feed {
-	return &Feed{
-		CacheTimeout:      cachetimeout,
-		EnforceCacheLimit: enforcecachelimit,
-		Type:              "none",
-		Version:           [2]int{0, 0},
-		Channels:          make([]Channel, 0),
-	}
-}
-
-func (this *Feed) addChannel(ch Channel) {
-	c := make([]Channel, len(this.Channels)+1)
-	copy(c, this.Channels)
-	c[len(c)-1] = ch
-	this.Channels = c
+	v := new(Feed)
+	v.CacheTimeout = cachetimeout
+	v.EnforceCacheLimit = enforcecachelimit
+	v.Type = "none"
+	return v
 }
 
 func (this *Feed) Fetch(uri string) (err os.Error) {
-	if !this.canUpdate() {
-		return
-	}
-
-	// Fetch data from remote location.
-	r, _, err := http.Get(uri)
-	if err != nil {
-		return
-	}
-
-	defer r.Body.Close()
-
-	var b []byte
-	if b, err = ioutil.ReadAll(r.Body); err != nil {
+	if !this.CanUpdate() {
 		return
 	}
 
 	this.Url = uri
+	this.Channels = nil
 
 	// Extract type and version of the feed so we can have the appropriate
 	// function parse it (rss 0.91, rss 0.92, rss 2, atom etc).
 	doc := xmlx.New()
-	if err = doc.LoadString(string(b)); err != nil {
+	if err = doc.LoadUri(uri); err != nil {
 		return
 	}
 	this.Type, this.Version = this.GetVersionInfo(doc)
@@ -120,7 +97,12 @@ func (this *Feed) Fetch(uri string) (err os.Error) {
 	return
 }
 
-func (this *Feed) canUpdate() bool {
+// This function returns true or false, depending on whether the CacheTimeout
+// value has expired or not. Additionally, it will ensure that we adhere to the
+// RSS spec's SkipDays and SkipHours values (if Feed.EnforceCacheLimit is set to
+// true). If this function returns true, you can be sure that a fresh feed
+// update will be performed.
+func (this *Feed) CanUpdate() bool {
 	// Make sure we are not within the specified cache-limit.
 	// This ensures we don't request data too often.
 	utc := time.UTC()
