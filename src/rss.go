@@ -13,27 +13,34 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 	days["Saturday"] = 6
 	days["Sunday"] = 7
 
-	getChan := func(pubdate string) *Channel {
+	getChan := func(pubdate, title string) *Channel {
 		for _, c := range this.Channels {
-			if c.PubDate == pubdate {
-				return c
+			switch {
+			case len(pubdate) > 0:
+				if c.PubDate == pubdate {
+					return c
+				}
+			case len(title) > 0:
+				if c.Title == title {
+					return c
+				}
 			}
 		}
 		return nil
 	}
 
-	haveItem := func(ch *Channel, id, title, desc string) bool {
+	haveItem := func(ch *Channel, pubdate, title, desc string) bool {
 		for _, item := range ch.Items {
 			switch {
-			case len(id) > 0:
-				if item.Id == id {
+			case len(pubdate) > 0:
+				if item.PubDate == pubdate {
 					return true
 				}
 			case len(title) > 0:
 				if item.Title == title {
 					return true
 				}
-			default:
+			case len(desc) > 0:
 				if item.Description == desc {
 					return true
 				}
@@ -49,7 +56,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 
 	channels := doc.SelectNodes("", "channel")
 	for _, node := range channels {
-		if ch = getChan(node.GetValue("", "pubDate")); ch == nil {
+		if ch = getChan(node.GetValue("", "pubDate"), node.GetValue("", "title")); ch == nil {
 			ch = new(Channel)
 			this.Channels = append(this.Channels, ch)
 		}

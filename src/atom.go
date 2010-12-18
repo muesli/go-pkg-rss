@@ -7,19 +7,37 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
 	ns := "http://www.w3.org/2005/Atom"
 	channels := doc.SelectNodes(ns, "feed")
 
-	getChan := func(id string) *Channel {
+	getChan := func(id, title string) *Channel {
 		for _, c := range this.Channels {
-			if c.Id == id {
-				return c
+			switch {
+			case len(id) > 0:
+				if c.Id == id {
+					return c
+				}
+			case len(title) > 0:
+				if c.Title == title {
+					return c
+				}
 			}
 		}
 		return nil
 	}
 
-	haveItem := func(ch *Channel, id string) bool {
+	haveItem := func(ch *Channel, id, title, desc string) bool {
 		for _, item := range ch.Items {
-			if item.Id == id {
-				return true
+			switch {
+			case len(id) > 0:
+				if item.Id == id {
+					return true
+				}
+			case len(title) > 0:
+				if item.Title == title {
+					return true
+				}
+			case len(desc) > 0:
+				if item.Description == desc {
+					return true
+				}
 			}
 		}
 		return false
@@ -31,7 +49,7 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
 	var list []*xmlx.Node
 
 	for _, node := range channels {
-		if ch = getChan(node.GetValue("", "pubDate")); ch == nil {
+		if ch = getChan(node.GetValue(ns, "id"), node.GetValue(ns, "title")); ch == nil {
 			ch = new(Channel)
 			this.Channels = append(this.Channels, ch)
 		}
@@ -74,7 +92,7 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
 		list = node.SelectNodes(ns, "entry")
 
 		for _, item := range list {
-			if haveItem(ch, item.GetValue("", "id")) {
+			if haveItem(ch, item.GetValue(ns, "id"), item.GetValue(ns, "title"), item.GetValue(ns, "summary")) {
 				continue
 			}
 
