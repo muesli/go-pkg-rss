@@ -21,18 +21,18 @@ func TestFeed(t *testing.T) {
 			t.Errorf("%s >>> %s", uri, err)
 		}
 	}
-	
-	/*
-Output of handlers:
 
-6 new item(s) in WriteTheWeb of http://cyber.law.harvard.edu/rss/examples/sampleRss091.xml
-1 new channel(s) in http://cyber.law.harvard.edu/rss/examples/sampleRss091.xml
-21 new item(s) in Dave Winer: Grateful Dead of http://cyber.law.harvard.edu/rss/examples/sampleRss092.xml
-1 new channel(s) in http://cyber.law.harvard.edu/rss/examples/sampleRss092.xml
-4 new item(s) in Liftoff News of http://cyber.law.harvard.edu/rss/examples/rss2sample.xml
-1 new channel(s) in http://cyber.law.harvard.edu/rss/examples/rss2sample.xml
-15 new item(s) in Blog@Case of http://blog.case.edu/news/feed.atom
-1 new channel(s) in http://blog.case.edu/news/feed.atom
+	/*
+		Output of handlers:
+
+		6 new item(s) in WriteTheWeb of http://cyber.law.harvard.edu/rss/examples/sampleRss091.xml
+		1 new channel(s) in http://cyber.law.harvard.edu/rss/examples/sampleRss091.xml
+		21 new item(s) in Dave Winer: Grateful Dead of http://cyber.law.harvard.edu/rss/examples/sampleRss092.xml
+		1 new channel(s) in http://cyber.law.harvard.edu/rss/examples/sampleRss092.xml
+		4 new item(s) in Liftoff News of http://cyber.law.harvard.edu/rss/examples/rss2sample.xml
+		1 new channel(s) in http://cyber.law.harvard.edu/rss/examples/rss2sample.xml
+		15 new item(s) in Blog@Case of http://blog.case.edu/news/feed.atom
+		1 new channel(s) in http://blog.case.edu/news/feed.atom
 	*/
 }
 

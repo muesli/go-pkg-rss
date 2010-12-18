@@ -78,6 +78,10 @@ func New(cachetimeout int, enforcecachelimit bool, ch ChannelHandler, ih ItemHan
 	return v
 }
 
+// This returns a timestamp of the last time the feed was updated.
+// The value is in seconds.
+func (this *Feed) LastUpdate() int64 { return this.lastupdate }
+
 func (this *Feed) Fetch(uri string) (err os.Error) {
 	if !this.CanUpdate() {
 		return
