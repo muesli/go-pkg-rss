@@ -27,7 +27,7 @@ package feeder
 
 import "os"
 import "time"
-import "xmlx"
+import xmlx "github.com/jteeuwen/go-pkg-xmlx"
 import "fmt"
 import "strconv"
 import "strings"

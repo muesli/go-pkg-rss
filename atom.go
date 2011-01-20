@@ -1,7 +1,7 @@
 package feeder
 
 import "os"
-import "xmlx"
+import xmlx "github.com/jteeuwen/go-pkg-xmlx"
 
 func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
 	ns := "http://www.w3.org/2005/Atom"

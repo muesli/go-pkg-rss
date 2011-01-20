@@ -1,7 +1,7 @@
 package feeder
 
 import "os"
-import "xmlx"
+import xmlx "github.com/jteeuwen/go-pkg-xmlx"
 
 func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 	days := make(map[string]int)
