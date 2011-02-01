@@ -1,7 +1,9 @@
 package feeder
 
-import "os"
-import xmlx "github.com/jteeuwen/go-pkg-xmlx"
+import (
+	"os"
+	xmlx "github.com/jteeuwen/go-pkg-xmlx"
+)
 
 func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 	days := make(map[string]int)
@@ -53,134 +55,135 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 	var i *Item
 	var n *xmlx.Node
 	var list, tl []*xmlx.Node
+	const ns = "*"
 
-	channels := doc.SelectNodes("", "channel")
+	channels := doc.SelectNodes(ns, "channel")
 	for _, node := range channels {
-		if ch = getChan(node.GetValue("", "pubDate"), node.GetValue("", "title")); ch == nil {
+		if ch = getChan(node.GetValue(ns, "pubDate"), node.GetValue(ns, "title")); ch == nil {
 			ch = new(Channel)
 			this.Channels = append(this.Channels, ch)
 		}
 
-		ch.Title = node.GetValue("", "title")
-		list = node.SelectNodes("", "link")
+		ch.Title = node.GetValue(ns, "title")
+		list = node.SelectNodes(ns, "link")
 		ch.Links = make([]Link, len(list))
 
 		for i, v := range list {
 			ch.Links[i].Href = v.Value
 		}
 
-		ch.Description = node.GetValue("", "description")
-		ch.Language = node.GetValue("", "language")
-		ch.Copyright = node.GetValue("", "copyright")
-		ch.ManagingEditor = node.GetValue("", "managingEditor")
-		ch.WebMaster = node.GetValue("", "webMaster")
-		ch.PubDate = node.GetValue("", "pubDate")
-		ch.LastBuildDate = node.GetValue("", "lastBuildDate")
-		ch.Docs = node.GetValue("", "docs")
+		ch.Description = node.GetValue(ns, "description")
+		ch.Language = node.GetValue(ns, "language")
+		ch.Copyright = node.GetValue(ns, "copyright")
+		ch.ManagingEditor = node.GetValue(ns, "managingEditor")
+		ch.WebMaster = node.GetValue(ns, "webMaster")
+		ch.PubDate = node.GetValue(ns, "pubDate")
+		ch.LastBuildDate = node.GetValue(ns, "lastBuildDate")
+		ch.Docs = node.GetValue(ns, "docs")
 
-		list = node.SelectNodes("", "category")
+		list = node.SelectNodes(ns, "category")
 		ch.Categories = make([]*Category, len(list))
 		for i, v := range list {
 			ch.Categories[i] = new(Category)
-			ch.Categories[i].Domain = v.GetAttr("", "domain")
+			ch.Categories[i].Domain = v.GetAttr(ns, "domain")
 			ch.Categories[i].Text = v.Value
 		}
 
-		if n = node.SelectNode("", "generator"); n != nil {
+		if n = node.SelectNode(ns, "generator"); n != nil {
 			ch.Generator = Generator{}
 			ch.Generator.Text = n.Value
 		}
 
-		ch.TTL = node.GetValuei("", "ttl")
-		ch.Rating = node.GetValue("", "rating")
+		ch.TTL = node.GetValuei(ns, "ttl")
+		ch.Rating = node.GetValue(ns, "rating")
 
-		list = node.SelectNodes("", "hour")
+		list = node.SelectNodes(ns, "hour")
 		ch.SkipHours = make([]int, len(list))
 		for i, v := range list {
-			ch.SkipHours[i] = int(v.GetValuei("", "hour"))
+			ch.SkipHours[i] = int(v.GetValuei(ns, "hour"))
 		}
 
-		list = node.SelectNodes("", "days")
+		list = node.SelectNodes(ns, "days")
 		ch.SkipDays = make([]int, len(list))
 		for i, v := range list {
 			ch.SkipDays[i] = days[v.Value]
 		}
 
-		if n = node.SelectNode("", "image"); n != nil {
-			ch.Image.Title = n.GetValue("", "title")
-			ch.Image.Url = n.GetValue("", "url")
-			ch.Image.Link = n.GetValue("", "link")
-			ch.Image.Width = n.GetValuei("", "width")
-			ch.Image.Height = n.GetValuei("", "height")
-			ch.Image.Description = n.GetValue("", "description")
+		if n = node.SelectNode(ns, "image"); n != nil {
+			ch.Image.Title = n.GetValue(ns, "title")
+			ch.Image.Url = n.GetValue(ns, "url")
+			ch.Image.Link = n.GetValue(ns, "link")
+			ch.Image.Width = n.GetValuei(ns, "width")
+			ch.Image.Height = n.GetValuei(ns, "height")
+			ch.Image.Description = n.GetValue(ns, "description")
 		}
 
-		if n = node.SelectNode("", "cloud"); n != nil {
+		if n = node.SelectNode(ns, "cloud"); n != nil {
 			ch.Cloud = Cloud{}
-			ch.Cloud.Domain = n.GetAttr("", "domain")
-			ch.Cloud.Port = n.GetAttri("", "port")
-			ch.Cloud.Path = n.GetAttr("", "path")
-			ch.Cloud.RegisterProcedure = n.GetAttr("", "registerProcedure")
-			ch.Cloud.Protocol = n.GetAttr("", "protocol")
+			ch.Cloud.Domain = n.GetAttr(ns, "domain")
+			ch.Cloud.Port = n.GetAttri(ns, "port")
+			ch.Cloud.Path = n.GetAttr(ns, "path")
+			ch.Cloud.RegisterProcedure = n.GetAttr(ns, "registerProcedure")
+			ch.Cloud.Protocol = n.GetAttr(ns, "protocol")
 		}
 
-		if n = node.SelectNode("", "textInput"); n != nil {
+		if n = node.SelectNode(ns, "textInput"); n != nil {
 			ch.TextInput = Input{}
-			ch.TextInput.Title = n.GetValue("", "title")
-			ch.TextInput.Description = n.GetValue("", "description")
-			ch.TextInput.Name = n.GetValue("", "name")
-			ch.TextInput.Link = n.GetValue("", "link")
+			ch.TextInput.Title = n.GetValue(ns, "title")
+			ch.TextInput.Description = n.GetValue(ns, "description")
+			ch.TextInput.Name = n.GetValue(ns, "name")
+			ch.TextInput.Link = n.GetValue(ns, "link")
 		}
 
 		itemcount := len(ch.Items)
-		list = node.SelectNodes("", "item")
+		list = node.SelectNodes(ns, "item")
 
 		for _, item := range list {
-			if haveItem(ch, item.GetValue("", "pubDate"),
-				item.GetValue("", "title"), item.GetValue("", "description")) {
+			if haveItem(ch, item.GetValue(ns, "pubDate"),
+				item.GetValue(ns, "title"), item.GetValue(ns, "description")) {
 				continue
 			}
 
 			i = new(Item)
-			i.Title = item.GetValue("", "title")
-			i.Description = item.GetValue("", "description")
+			i.Title = item.GetValue(ns, "title")
+			i.Description = item.GetValue(ns, "description")
 
-			tl = node.SelectNodes("", "link")
+			tl = node.SelectNodes(ns, "link")
 			for _, v := range tl {
 				lnk := new(Link)
 				lnk.Href = v.Value
 				i.Links = append(i.Links, lnk)
 			}
 
-			if n = item.SelectNode("", "author"); n != nil {
+			if n = item.SelectNode(ns, "author"); n != nil {
 				i.Author = Author{}
 				i.Author.Name = n.Value
 			}
 
-			i.Comments = item.GetValue("", "comments")
-			i.Guid = item.GetValue("", "guid")
-			i.PubDate = item.GetValue("", "pubDate")
+			i.Comments = item.GetValue(ns, "comments")
+			i.Guid = item.GetValue(ns, "guid")
+			i.PubDate = item.GetValue(ns, "pubDate")
 
-			tl = item.SelectNodes("", "category")
+			tl = item.SelectNodes(ns, "category")
 			for _, lv := range tl {
 				cat := new(Category)
-				cat.Domain = lv.GetAttr("", "domain")
+				cat.Domain = lv.GetAttr(ns, "domain")
 				cat.Text = lv.Value
 				i.Categories = append(i.Categories, cat)
 			}
 
-			tl = item.SelectNodes("", "enclosure")
+			tl = item.SelectNodes(ns, "enclosure")
 			for _, lv := range tl {
 				enc := new(Enclosure)
-				enc.Url = lv.GetAttr("", "url")
-				enc.Length = lv.GetAttri64("", "length")
-				enc.Type = lv.GetAttr("", "type")
+				enc.Url = lv.GetAttr(ns, "url")
+				enc.Length = lv.GetAttri64(ns, "length")
+				enc.Type = lv.GetAttr(ns, "type")
 				i.Enclosures = append(i.Enclosures, enc)
 			}
 
-			if src := item.SelectNode("", "source"); src != nil {
+			if src := item.SelectNode(ns, "source"); src != nil {
 				i.Source = new(Source)
-				i.Source.Url = src.GetAttr("", "url")
+				i.Source.Url = src.GetAttr(ns, "url")
 				i.Source.Text = src.Value
 			}
 

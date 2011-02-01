@@ -25,12 +25,14 @@
 */
 package feeder
 
-import "os"
-import "time"
-import xmlx "github.com/jteeuwen/go-pkg-xmlx"
-import "fmt"
-import "strconv"
-import "strings"
+import (
+	"os"
+	"time"
+	xmlx "github.com/jteeuwen/go-pkg-xmlx"
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 type ChannelHandler func(f *Feed, newchannels []*Channel)
 type ItemHandler func(f *Feed, ch *Channel, newitems []*Item)
@@ -187,26 +189,33 @@ func (this *Feed) testVersions() bool {
 }
 
 func (this *Feed) GetVersionInfo(doc *xmlx.Document) (ftype string, fversion [2]int) {
-	node := doc.SelectNode("http://www.w3.org/2005/Atom", "feed")
-	if node == nil {
+	var node *xmlx.Node
+
+	if node = doc.SelectNode("http://www.w3.org/2005/Atom", "feed"); node == nil {
 		goto rss
 	}
+
 	ftype = "atom"
 	fversion = [2]int{1, 0}
 	return
 
 rss:
-	node = doc.SelectNode("", "rss")
-	if node == nil {
-		goto end
+	if node = doc.SelectNode("", "rss"); node != nil {
+		ftype = "rss"
+		version := node.GetAttr("", "version")
+		p := strings.Index(version, ".")
+		major, _ := strconv.Atoi(version[0:p])
+		minor, _ := strconv.Atoi(version[p+1 : len(version)])
+		fversion = [2]int{major, minor}
+		return
 	}
-	ftype = "rss"
-	version := node.GetAttr("", "version")
-	p := strings.Index(version, ".")
-	major, _ := strconv.Atoi(version[0:p])
-	minor, _ := strconv.Atoi(version[p+1 : len(version)])
-	fversion = [2]int{major, minor}
-	return
+
+	// issue#5: Some documents have an RDF root node instead of rss.
+	if node = doc.SelectNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "RDF"); node != nil {
+		ftype = "rss"
+		fversion = [2]int{1, 1}
+		return
+	}
 
 end:
 	ftype = "unknown"
