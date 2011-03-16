@@ -217,7 +217,6 @@ rss:
 		return
 	}
 
-end:
 	ftype = "unknown"
 	fversion = [2]int{0, 0}
 	return
