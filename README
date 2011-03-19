@@ -29,9 +29,3 @@ either a new channel or a new item is found that previously did not exist.
 This allows you to easily monitor a feed for changes. See src/feed_test.go for
 an example of how this works.
 
-================================================================================
- LICENSE
-================================================================================
-
-All code is subject to a 1-clause BSD license. See the LICENSE file for its
-contents.
