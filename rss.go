@@ -59,12 +59,12 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 
 	channels := doc.SelectNodes(ns, "channel")
 	for _, node := range channels {
-		if ch = getChan(node.GetValue(ns, "pubDate"), node.GetValue(ns, "title")); ch == nil {
+		if ch = getChan(node.S(ns, "pubDate"), node.S(ns, "title")); ch == nil {
 			ch = new(Channel)
 			this.Channels = append(this.Channels, ch)
 		}
 
-		ch.Title = node.GetValue(ns, "title")
+		ch.Title = node.S(ns, "title")
 		list = node.SelectNodes(ns, "link")
 		ch.Links = make([]Link, len(list))
 
@@ -72,20 +72,20 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 			ch.Links[i].Href = v.Value
 		}
 
-		ch.Description = node.GetValue(ns, "description")
-		ch.Language = node.GetValue(ns, "language")
-		ch.Copyright = node.GetValue(ns, "copyright")
-		ch.ManagingEditor = node.GetValue(ns, "managingEditor")
-		ch.WebMaster = node.GetValue(ns, "webMaster")
-		ch.PubDate = node.GetValue(ns, "pubDate")
-		ch.LastBuildDate = node.GetValue(ns, "lastBuildDate")
-		ch.Docs = node.GetValue(ns, "docs")
+		ch.Description = node.S(ns, "description")
+		ch.Language = node.S(ns, "language")
+		ch.Copyright = node.S(ns, "copyright")
+		ch.ManagingEditor = node.S(ns, "managingEditor")
+		ch.WebMaster = node.S(ns, "webMaster")
+		ch.PubDate = node.S(ns, "pubDate")
+		ch.LastBuildDate = node.S(ns, "lastBuildDate")
+		ch.Docs = node.S(ns, "docs")
 
 		list = node.SelectNodes(ns, "category")
 		ch.Categories = make([]*Category, len(list))
 		for i, v := range list {
 			ch.Categories[i] = new(Category)
-			ch.Categories[i].Domain = v.GetAttr(ns, "domain")
+			ch.Categories[i].Domain = v.As(ns, "domain")
 			ch.Categories[i].Text = v.Value
 		}
 
@@ -94,13 +94,13 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 			ch.Generator.Text = n.Value
 		}
 
-		ch.TTL = node.GetValuei(ns, "ttl")
-		ch.Rating = node.GetValue(ns, "rating")
+		ch.TTL = node.I(ns, "ttl")
+		ch.Rating = node.S(ns, "rating")
 
 		list = node.SelectNodes(ns, "hour")
 		ch.SkipHours = make([]int, len(list))
 		for i, v := range list {
-			ch.SkipHours[i] = int(v.GetValuei(ns, "hour"))
+			ch.SkipHours[i] = v.I(ns, "hour")
 		}
 
 		list = node.SelectNodes(ns, "days")
@@ -110,43 +110,43 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 		}
 
 		if n = node.SelectNode(ns, "image"); n != nil {
-			ch.Image.Title = n.GetValue(ns, "title")
-			ch.Image.Url = n.GetValue(ns, "url")
-			ch.Image.Link = n.GetValue(ns, "link")
-			ch.Image.Width = n.GetValuei(ns, "width")
-			ch.Image.Height = n.GetValuei(ns, "height")
-			ch.Image.Description = n.GetValue(ns, "description")
+			ch.Image.Title = n.S(ns, "title")
+			ch.Image.Url = n.S(ns, "url")
+			ch.Image.Link = n.S(ns, "link")
+			ch.Image.Width = n.I(ns, "width")
+			ch.Image.Height = n.I(ns, "height")
+			ch.Image.Description = n.S(ns, "description")
 		}
 
 		if n = node.SelectNode(ns, "cloud"); n != nil {
 			ch.Cloud = Cloud{}
-			ch.Cloud.Domain = n.GetAttr(ns, "domain")
-			ch.Cloud.Port = n.GetAttri(ns, "port")
-			ch.Cloud.Path = n.GetAttr(ns, "path")
-			ch.Cloud.RegisterProcedure = n.GetAttr(ns, "registerProcedure")
-			ch.Cloud.Protocol = n.GetAttr(ns, "protocol")
+			ch.Cloud.Domain = n.As(ns, "domain")
+			ch.Cloud.Port = n.Ai(ns, "port")
+			ch.Cloud.Path = n.As(ns, "path")
+			ch.Cloud.RegisterProcedure = n.As(ns, "registerProcedure")
+			ch.Cloud.Protocol = n.As(ns, "protocol")
 		}
 
 		if n = node.SelectNode(ns, "textInput"); n != nil {
 			ch.TextInput = Input{}
-			ch.TextInput.Title = n.GetValue(ns, "title")
-			ch.TextInput.Description = n.GetValue(ns, "description")
-			ch.TextInput.Name = n.GetValue(ns, "name")
-			ch.TextInput.Link = n.GetValue(ns, "link")
+			ch.TextInput.Title = n.S(ns, "title")
+			ch.TextInput.Description = n.S(ns, "description")
+			ch.TextInput.Name = n.S(ns, "name")
+			ch.TextInput.Link = n.S(ns, "link")
 		}
 
 		itemcount := len(ch.Items)
 		list = node.SelectNodes(ns, "item")
 
 		for _, item := range list {
-			if haveItem(ch, item.GetValue(ns, "pubDate"),
-				item.GetValue(ns, "title"), item.GetValue(ns, "description")) {
+			if haveItem(ch, item.S(ns, "pubDate"),
+				item.S(ns, "title"), item.S(ns, "description")) {
 				continue
 			}
 
 			i = new(Item)
-			i.Title = item.GetValue(ns, "title")
-			i.Description = item.GetValue(ns, "description")
+			i.Title = item.S(ns, "title")
+			i.Description = item.S(ns, "description")
 
 			tl = node.SelectNodes(ns, "link")
 			for _, v := range tl {
@@ -160,14 +160,14 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 				i.Author.Name = n.Value
 			}
 
-			i.Comments = item.GetValue(ns, "comments")
-			i.Guid = item.GetValue(ns, "guid")
-			i.PubDate = item.GetValue(ns, "pubDate")
+			i.Comments = item.S(ns, "comments")
+			i.Guid = item.S(ns, "guid")
+			i.PubDate = item.S(ns, "pubDate")
 
 			tl = item.SelectNodes(ns, "category")
 			for _, lv := range tl {
 				cat := new(Category)
-				cat.Domain = lv.GetAttr(ns, "domain")
+				cat.Domain = lv.As(ns, "domain")
 				cat.Text = lv.Value
 				i.Categories = append(i.Categories, cat)
 			}
@@ -175,15 +175,15 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 			tl = item.SelectNodes(ns, "enclosure")
 			for _, lv := range tl {
 				enc := new(Enclosure)
-				enc.Url = lv.GetAttr(ns, "url")
-				enc.Length = lv.GetAttri64(ns, "length")
-				enc.Type = lv.GetAttr(ns, "type")
+				enc.Url = lv.As(ns, "url")
+				enc.Length = lv.Ai64(ns, "length")
+				enc.Type = lv.As(ns, "type")
 				i.Enclosures = append(i.Enclosures, enc)
 			}
 
 			if src := item.SelectNode(ns, "source"); src != nil {
 				i.Source = new(Source)
-				i.Source.Url = src.GetAttr(ns, "url")
+				i.Source.Url = src.As(ns, "url")
 				i.Source.Text = src.Value
 			}
 

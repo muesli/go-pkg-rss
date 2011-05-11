@@ -163,7 +163,7 @@ func (this *Feed) CanUpdate() bool {
 // before the feed should update.
 func (this *Feed) SecondsTillUpdate() int64 {
 	utc := time.UTC()
-	return int64(this.CacheTimeout*60)-(utc.Seconds()-this.lastupdate)
+	return int64(this.CacheTimeout*60) - (utc.Seconds() - this.lastupdate)
 }
 
 func (this *Feed) buildFeed(doc *xmlx.Document) (err os.Error) {
@@ -209,7 +209,7 @@ func (this *Feed) GetVersionInfo(doc *xmlx.Document) (ftype string, fversion [2]
 rss:
 	if node = doc.SelectNode("", "rss"); node != nil {
 		ftype = "rss"
-		version := node.GetAttr("", "version")
+		version := node.As("", "version")
 		p := strings.Index(version, ".")
 		major, _ := strconv.Atoi(version[0:p])
 		minor, _ := strconv.Atoi(version[p+1 : len(version)])

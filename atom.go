@@ -49,86 +49,86 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
 	var list []*xmlx.Node
 
 	for _, node := range channels {
-		if ch = getChan(node.GetValue(ns, "id"), node.GetValue(ns, "title")); ch == nil {
+		if ch = getChan(node.S(ns, "id"), node.S(ns, "title")); ch == nil {
 			ch = new(Channel)
 			this.Channels = append(this.Channels, ch)
 		}
 
-		ch.Title = node.GetValue(ns, "title")
-		ch.LastBuildDate = node.GetValue(ns, "updated")
-		ch.Id = node.GetValue(ns, "id")
-		ch.Rights = node.GetValue(ns, "rights")
+		ch.Title = node.S(ns, "title")
+		ch.LastBuildDate = node.S(ns, "updated")
+		ch.Id = node.S(ns, "id")
+		ch.Rights = node.S(ns, "rights")
 
 		list = node.SelectNodes(ns, "link")
 		ch.Links = make([]Link, len(list))
 		for i, v := range list {
-			ch.Links[i].Href = v.GetAttr("", "href")
-			ch.Links[i].Rel = v.GetAttr("", "rel")
-			ch.Links[i].Type = v.GetAttr("", "type")
-			ch.Links[i].HrefLang = v.GetAttr("", "hreflang")
+			ch.Links[i].Href = v.As("", "href")
+			ch.Links[i].Rel = v.As("", "rel")
+			ch.Links[i].Type = v.As("", "type")
+			ch.Links[i].HrefLang = v.As("", "hreflang")
 		}
 
 		if tn = node.SelectNode(ns, "subtitle"); tn != nil {
 			ch.SubTitle = SubTitle{}
-			ch.SubTitle.Type = tn.GetAttr("", "type")
+			ch.SubTitle.Type = tn.As("", "type")
 			ch.SubTitle.Text = tn.Value
 		}
 
 		if tn = node.SelectNode(ns, "generator"); tn != nil {
 			ch.Generator = Generator{}
-			ch.Generator.Uri = tn.GetAttr("", "uri")
-			ch.Generator.Version = tn.GetAttr("", "version")
+			ch.Generator.Uri = tn.As("", "uri")
+			ch.Generator.Version = tn.As("", "version")
 			ch.Generator.Text = tn.Value
 		}
 
 		if tn = node.SelectNode(ns, "author"); tn != nil {
 			ch.Author = Author{}
-			ch.Author.Name = tn.GetValue("", "name")
-			ch.Author.Uri = tn.GetValue("", "uri")
-			ch.Author.Email = tn.GetValue("", "email")
+			ch.Author.Name = tn.S("", "name")
+			ch.Author.Uri = tn.S("", "uri")
+			ch.Author.Email = tn.S("", "email")
 		}
 
 		itemcount := len(ch.Items)
 		list = node.SelectNodes(ns, "entry")
 
 		for _, item := range list {
-			if haveItem(ch, item.GetValue(ns, "id"), item.GetValue(ns, "title"), item.GetValue(ns, "summary")) {
+			if haveItem(ch, item.S(ns, "id"), item.S(ns, "title"), item.S(ns, "summary")) {
 				continue
 			}
 
 			i = new(Item)
-			i.Title = item.GetValue(ns, "title")
-			i.Id = item.GetValue(ns, "id")
-			i.PubDate = item.GetValue(ns, "updated")
-			i.Description = item.GetValue(ns, "summary")
+			i.Title = item.S(ns, "title")
+			i.Id = item.S(ns, "id")
+			i.PubDate = item.S(ns, "updated")
+			i.Description = item.S(ns, "summary")
 
 			links := item.SelectNodes(ns, "link")
 			for _, lv := range links {
-				if tn.GetAttr(ns, "rel") == "enclosure" {
+				if tn.As(ns, "rel") == "enclosure" {
 					enc := new(Enclosure)
-					enc.Url = lv.GetAttr("", "href")
-					enc.Type = lv.GetAttr("", "type")
+					enc.Url = lv.As("", "href")
+					enc.Type = lv.As("", "type")
 					i.Enclosures = append(i.Enclosures, enc)
 				} else {
 					lnk := new(Link)
-					lnk.Href = lv.GetAttr("", "href")
-					lnk.Rel = lv.GetAttr("", "rel")
-					lnk.Type = lv.GetAttr("", "type")
-					lnk.HrefLang = lv.GetAttr("", "hreflang")
+					lnk.Href = lv.As("", "href")
+					lnk.Rel = lv.As("", "rel")
+					lnk.Type = lv.As("", "type")
+					lnk.HrefLang = lv.As("", "hreflang")
 					i.Links = append(i.Links, lnk)
 				}
 			}
 
 			list = item.SelectNodes(ns, "contributor")
 			for _, cv := range list {
-				i.Contributors = append(i.Contributors, cv.GetValue("", "name"))
+				i.Contributors = append(i.Contributors, cv.S("", "name"))
 			}
 
 			if tn = item.SelectNode(ns, "content"); tn != nil {
 				i.Content = new(Content)
-				i.Content.Type = tn.GetAttr("", "type")
-				i.Content.Lang = tn.GetValue("xml", "lang")
-				i.Content.Base = tn.GetValue("xml", "base")
+				i.Content.Type = tn.As("", "type")
+				i.Content.Lang = tn.S("xml", "lang")
+				i.Content.Base = tn.S("xml", "base")
 				i.Content.Text = tn.Value
 			}
 
