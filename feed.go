@@ -159,6 +159,13 @@ func (this *Feed) CanUpdate() bool {
 	return true
 }
 
+// Returns the number of seconds needed to elapse
+// before the feed should update.
+func (this *Feed) SecondsTillUpdate() int64 {
+	utc := time.UTC()
+	return int64(this.CacheTimeout*60)-(utc.Seconds()-this.lastupdate)
+}
+
 func (this *Feed) buildFeed(doc *xmlx.Document) (err os.Error) {
 	switch this.Type {
 	case "rss":
