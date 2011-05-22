@@ -3,6 +3,11 @@ package main
 /*
 This is a minimal sample application, demonstrating how to set up an RSS feed
 for regular polling of new channels/items.
+
+Build & run with:
+
+ $ 6g example.go && 6l example.6 && ./6.out
+
 */
 
 import (
@@ -13,10 +18,9 @@ import (
 )
 
 func main() {
-	// This sets up a new feed and polls it for new channels/items in
-	// a separate goroutine. Invoke it with 'go PollFeed(..)' to have the
-	// polling performed in a separate goroutine, so you can continue with
-	// the rest of your program.
+	// This sets up a new feed and polls it for new channels/items.
+	// Invoke it with 'go PollFeed(...)' to have the polling performed in a
+	// separate goroutine, so you can continue with the rest of your program.
 	PollFeed("http://cyber.law.harvard.edu/rss/examples/sampleRss091.xml", 5)
 }
 
