@@ -148,7 +148,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
 			i.Title = item.S(ns, "title")
 			i.Description = item.S(ns, "description")
 
-			tl = node.SelectNodes(ns, "link")
+			tl = item.SelectNodes(ns, "link")
 			for _, v := range tl {
 				lnk := new(Link)
 				lnk.Href = v.Value
