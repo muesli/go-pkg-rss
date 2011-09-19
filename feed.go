@@ -140,7 +140,7 @@ func (this *Feed) CanUpdate() bool {
 	if len(this.Channels) == 0 && this.Type == "rss" {
 		if this.EnforceCacheLimit && len(this.Channels[0].SkipDays) > 0 {
 			for _, v := range this.Channels[0].SkipDays {
-				if v == utc.Weekday {
+				if v == utc.Weekday() {
 					return false
 				}
 			}
