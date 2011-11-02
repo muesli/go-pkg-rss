@@ -26,7 +26,7 @@
 package feeder
 
 import (
-	"os"
+	"errors"
 	"time"
 	xmlx "github.com/jteeuwen/go-pkg-xmlx"
 	"fmt"
@@ -84,7 +84,7 @@ func New(cachetimeout int, enforcecachelimit bool, ch ChannelHandler, ih ItemHan
 // The value is in seconds.
 func (this *Feed) LastUpdate() int64 { return this.lastupdate }
 
-func (this *Feed) Fetch(uri string) (err os.Error) {
+func (this *Feed) Fetch(uri string) (err error) {
 	if !this.CanUpdate() {
 		return
 	}
@@ -100,7 +100,7 @@ func (this *Feed) Fetch(uri string) (err os.Error) {
 	this.Type, this.Version = this.GetVersionInfo(doc)
 
 	if ok := this.testVersions(); !ok {
-		err = os.NewError(fmt.Sprintf("Unsupported feed: %s, version: %+v", this.Type, this.Version))
+		err = errors.New(fmt.Sprintf("Unsupported feed: %s, version: %+v", this.Type, this.Version))
 		return
 	}
 
@@ -166,7 +166,7 @@ func (this *Feed) SecondsTillUpdate() int64 {
 	return int64(this.CacheTimeout*60) - (utc.Seconds() - this.lastupdate)
 }
 
-func (this *Feed) buildFeed(doc *xmlx.Document) (err os.Error) {
+func (this *Feed) buildFeed(doc *xmlx.Document) (err error) {
 	switch this.Type {
 	case "rss":
 		err = this.readRss2(doc)

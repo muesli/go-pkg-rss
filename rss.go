@@ -1,11 +1,8 @@
 package feeder
 
-import (
-	"os"
-	xmlx "github.com/jteeuwen/go-pkg-xmlx"
-)
+import xmlx "github.com/jteeuwen/go-pkg-xmlx"
 
-func (this *Feed) readRss2(doc *xmlx.Document) (err os.Error) {
+func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 	days := make(map[string]int)
 	days["Monday"] = 1
 	days["Tuesday"] = 2

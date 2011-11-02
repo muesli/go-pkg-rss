@@ -1,10 +1,10 @@
 package feeder
 
 import "testing"
-import "os"
 
 func TestFeed(t *testing.T) {
 	urilist := []string{
+		//"http://localhost:8081/craigslist.rss",
 		//"http://store.steampowered.com/feeds/news.xml", // This feed violates the rss spec.
 		"http://cyber.law.harvard.edu/rss/examples/sampleRss091.xml",
 		"http://cyber.law.harvard.edu/rss/examples/sampleRss092.xml",
@@ -13,7 +13,7 @@ func TestFeed(t *testing.T) {
 	}
 
 	var feed *Feed
-	var err os.Error
+	var err error
 
 	for _, uri := range urilist {
 		feed = New(5, true, chanHandler, itemHandler)

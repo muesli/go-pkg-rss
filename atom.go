@@ -1,9 +1,8 @@
 package feeder
 
-import "os"
 import xmlx "github.com/jteeuwen/go-pkg-xmlx"
 
-func (this *Feed) readAtom(doc *xmlx.Document) (err os.Error) {
+func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 	ns := "http://www.w3.org/2005/Atom"
 	channels := doc.SelectNodes(ns, "feed")
 
