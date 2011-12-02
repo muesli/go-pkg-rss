@@ -130,8 +130,8 @@ func (this *Feed) Fetch(uri string) (err error) {
 func (this *Feed) CanUpdate() bool {
 	// Make sure we are not within the specified cache-limit.
 	// This ensures we don't request data too often.
-	utc := time.UTC()
-	if utc.Seconds()-this.lastupdate < int64(this.CacheTimeout*60) {
+	utc := time.Now().UTC()
+	if utc.UnixNano()-this.lastupdate < int64(this.CacheTimeout*60) {
 		return false
 	}
 
@@ -140,7 +140,7 @@ func (this *Feed) CanUpdate() bool {
 	if len(this.Channels) == 0 && this.Type == "rss" {
 		if this.EnforceCacheLimit && len(this.Channels[0].SkipDays) > 0 {
 			for _, v := range this.Channels[0].SkipDays {
-				if v == utc.Weekday() {
+				if time.Weekday(v) == utc.Weekday() {
 					return false
 				}
 			}
@@ -148,22 +148,22 @@ func (this *Feed) CanUpdate() bool {
 
 		if this.EnforceCacheLimit && len(this.Channels[0].SkipHours) > 0 {
 			for _, v := range this.Channels[0].SkipHours {
-				if v == utc.Hour {
+				if v == utc.Hour() {
 					return false
 				}
 			}
 		}
 	}
 
-	this.lastupdate = utc.Seconds()
+	this.lastupdate = utc.UnixNano()
 	return true
 }
 
 // Returns the number of seconds needed to elapse
 // before the feed should update.
 func (this *Feed) SecondsTillUpdate() int64 {
-	utc := time.UTC()
-	return int64(this.CacheTimeout*60) - (utc.Seconds() - this.lastupdate)
+	utc := time.Now().UTC()
+	return int64(this.CacheTimeout*60) - (utc.Unix() - this.lastupdate)
 }
 
 func (this *Feed) buildFeed(doc *xmlx.Document) (err error) {
