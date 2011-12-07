@@ -27,11 +27,11 @@ package feeder
 
 import (
 	"errors"
-	"time"
-	xmlx "github.com/jteeuwen/go-pkg-xmlx"
 	"fmt"
+	xmlx "github.com/jteeuwen/go-pkg-xmlx"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type ChannelHandler func(f *Feed, newchannels []*Channel)

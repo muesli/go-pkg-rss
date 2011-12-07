@@ -12,9 +12,9 @@ Build & run with:
 
 import (
 	"fmt"
+	rss "github.com/jteeuwen/go-pkg-rss"
 	"os"
 	"time"
-	rss "github.com/jteeuwen/go-pkg-rss"
 )
 
 func main() {
