@@ -34,13 +34,11 @@ an example of how this works.
  DEPENDENCIES
 ================================================================================
 
- goinstall github.com/jteeuwen/go-pkg-xmlx
+ github.com/jteeuwen/go-pkg-xmlx
 
 ================================================================================
  USAGE
 ================================================================================
-
- $ goinstall github.com/jteeuwen/go-pkg-rss
 
  An idiomatic example program can be found in example.go.
 
