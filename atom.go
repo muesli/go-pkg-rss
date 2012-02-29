@@ -103,7 +103,7 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 
 			links := item.SelectNodes(ns, "link")
 			for _, lv := range links {
-				if tn.As(ns, "rel") == "enclosure" {
+				if lv.As(ns, "rel") == "enclosure" {
 					enc := new(Enclosure)
 					enc.Url = lv.As("", "href")
 					enc.Type = lv.As("", "type")
