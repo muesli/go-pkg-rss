@@ -21,19 +21,19 @@ func main() {
 	// This sets up a new feed and polls it for new channels/items.
 	// Invoke it with 'go PollFeed(...)' to have the polling performed in a
 	// separate goroutine, so you can continue with the rest of your program.
-	PollFeed("http://cyber.law.harvard.edu/rss/examples/sampleRss091.xml", 5)
+	PollFeed("http://blog.case.edu/news/feed.atom", 5)
 }
 
 func PollFeed(uri string, timeout int) {
 	feed := rss.New(timeout, true, chanHandler, itemHandler)
 
 	for {
-		if err := feed.Fetch(uri); err != nil {
+		if err := feed.Fetch(uri, nil); err != nil {
 			fmt.Fprintf(os.Stderr, "[e] %s: %s", uri, err)
 			return
 		}
 
-		<-time.After(feed.SecondsTillUpdate() * 1e9)
+		<-time.After(time.Duration(feed.SecondsTillUpdate() * 1e9))
 	}
 }
 
