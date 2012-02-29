@@ -84,7 +84,13 @@ func New(cachetimeout int, enforcecachelimit bool, ch ChannelHandler, ih ItemHan
 // The value is in seconds.
 func (this *Feed) LastUpdate() int64 { return this.lastupdate }
 
-func (this *Feed) Fetch(uri string) (err error) {
+// Fetch retrieves the feed's latest content if necessary.
+//
+// The charset parameter overrides the xml decoder's CharsetReader.
+// This allows us to specify a custom character encoding conversion
+// routine when dealing with non-utf8 input. Supply 'nil' to use the
+// default from Go's xml package.
+func (this *Feed) Fetch(uri string, charset xmlx.CharsetFunc) (err error) {
 	if !this.CanUpdate() {
 		return
 	}
@@ -94,7 +100,8 @@ func (this *Feed) Fetch(uri string) (err error) {
 	// Extract type and version of the feed so we can have the appropriate
 	// function parse it (rss 0.91, rss 0.92, rss 2, atom etc).
 	doc := xmlx.New()
-	if err = doc.LoadUri(uri); err != nil {
+
+	if err = doc.LoadUri(uri, charset); err != nil {
 		return
 	}
 	this.Type, this.Version = this.GetVersionInfo(doc)
