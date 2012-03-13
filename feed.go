@@ -170,7 +170,7 @@ func (this *Feed) CanUpdate() bool {
 // before the feed should update.
 func (this *Feed) SecondsTillUpdate() int64 {
 	utc := time.Now().UTC()
-	return int64(this.CacheTimeout*60) - (utc.Unix() - this.lastupdate)
+	return int64(this.CacheTimeout*60) - (utc.Unix() - (this.lastupdate / 1e9))
 }
 
 func (this *Feed) buildFeed(doc *xmlx.Document) (err error) {
