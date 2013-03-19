@@ -1,6 +1,6 @@
 /*
  Author: jim teeuwen <jimteeuwen@gmail.com>
- Dependencies: go-pkg-xmlx (http://github.com/jteeuwen/go-pkg-xmlx)
+ Dependencies: go-pkg-xmlx (http://github.com/anschelsc/go-pkg-xmlx)
 
  This package allows us to fetch Rss and Atom feeds from the internet.
  They are parsed into an object tree which is a hyvrid of both the RSS and Atom
@@ -28,7 +28,8 @@ package feeder
 import (
 	"errors"
 	"fmt"
-	xmlx "github.com/jteeuwen/go-pkg-xmlx"
+	xmlx "github.com/anschelsc/go-pkg-xmlx"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -90,7 +91,22 @@ func (this *Feed) LastUpdate() int64 { return this.lastupdate }
 // This allows us to specify a custom character encoding conversion
 // routine when dealing with non-utf8 input. Supply 'nil' to use the
 // default from Go's xml package.
+//
+// This is equivalent to calling FetchClient with http.DefaultClient
 func (this *Feed) Fetch(uri string, charset xmlx.CharsetFunc) (err error) {
+	return this.FetchClient(uri, http.DefaultClient, charset)
+}
+
+// Fetch retrieves the feed's latest content if necessary.
+//
+// The charset parameter overrides the xml decoder's CharsetReader.
+// This allows us to specify a custom character encoding conversion
+// routine when dealing with non-utf8 input. Supply 'nil' to use the
+// default from Go's xml package.
+//
+// The client parameter allows the use of arbitrary network connections, for
+// example the Google App Engine "URL Fetch" service.
+func (this *Feed) FetchClient(uri string, client *http.Client, charset xmlx.CharsetFunc) (err error) {
 	if !this.CanUpdate() {
 		return
 	}
@@ -101,7 +117,7 @@ func (this *Feed) Fetch(uri string, charset xmlx.CharsetFunc) (err error) {
 	// function parse it (rss 0.91, rss 0.92, rss 2, atom etc).
 	doc := xmlx.New()
 
-	if err = doc.LoadUri(uri, charset); err != nil {
+	if err = doc.LoadUriClient(uri, client, charset); err != nil {
 		return
 	}
 	this.Type, this.Version = this.GetVersionInfo(doc)
