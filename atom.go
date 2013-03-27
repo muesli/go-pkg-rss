@@ -130,6 +130,13 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 				i.Content.Base = tn.S("xml", "base")
 				i.Content.Text = tn.Value
 			}
+			
+			if tn = item.SelectNode(ns, "author"); tn != nil {
+				i.Author = Author{}		
+		                i.Author.Name = tn.S(ns, "name")
+		                i.Author.Uri = tn.S(ns, "uri")
+		                i.Author.Email = tn.S(ns, "email")
+            		}
 
 			ch.Items = append(ch.Items, i)
 		}
