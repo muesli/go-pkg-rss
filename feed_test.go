@@ -56,6 +56,18 @@ func Test_RssAuthor(t *testing.T) {
     }
 }
 
+func Test_CData(t *testing.T) {
+	content, _ := ioutil.ReadFile("testdata/iosBoardGameGeek.rss")
+	feed := New(1, true, chanHandler, itemHandler)
+	feed.FetchBytes("http://example.com", content, nil)
+
+	item := items[0]
+	expected := `<p>abc<div>"def"</div>ghi`
+    if item.Description != expected {
+		t.Errorf("Expected item.Description to be [%s] but item.Description=[%s]", expected, item.Description)
+	}
+}
+
 func chanHandler(feed *Feed, newchannels []*Channel) {
 	println(len(newchannels), "new channel(s) in", feed.Url)
 }
