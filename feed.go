@@ -112,14 +112,37 @@ func (this *Feed) FetchClient(uri string, client *http.Client, charset xmlx.Char
 	}
 
 	this.Url = uri
-
-	// Extract type and version of the feed so we can have the appropriate
-	// function parse it (rss 0.91, rss 0.92, rss 2, atom etc).
 	doc := xmlx.New()
 
 	if err = doc.LoadUriClient(uri, client, charset); err != nil {
 		return
 	}
+
+	return this.makeFeed(doc)
+}
+
+// Fetch retrieves the feed's content from the []byte
+//
+// The charset parameter overrides the xml decoder's CharsetReader.
+// This allows us to specify a custom character encoding conversion
+// routine when dealing with non-utf8 input. Supply 'nil' to use the
+// default from Go's xml package.
+
+func (this *Feed) FetchBytes(uri string, content []byte, charset xmlx.CharsetFunc) (err error) {
+	this.Url = uri
+
+	doc := xmlx.New()
+
+	if err = doc.LoadBytes(content, charset); err != nil {
+		return
+	}
+
+	return this.makeFeed(doc)
+}
+
+func (this *Feed) makeFeed(doc *xmlx.Document) (err error) {
+	// Extract type and version of the feed so we can have the appropriate
+	// function parse it (rss 0.91, rss 0.92, rss 2, atom etc).
 	this.Type, this.Version = this.GetVersionInfo(doc)
 
 	if ok := this.testVersions(); !ok {
@@ -142,7 +165,7 @@ func (this *Feed) FetchClient(uri string, client *http.Client, charset xmlx.Char
 		this.CacheTimeout = this.Channels[0].TTL
 	}
 
-	return
+    return
 }
 
 // This function returns true or false, depending on whether the CacheTimeout
