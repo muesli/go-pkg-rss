@@ -188,6 +188,15 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 				i.Source.Text = src.Value
 			}
 
+			tl = item.SelectNodes("http://purl.org/rss/1.0/modules/content/", "*")
+			for _, lv := range tl {
+				if lv.Name.Local == "encoded" {
+					i.Content = new(Content)
+					i.Content.Text = lv.String()
+					break
+				}
+			}
+
 			ch.Items = append(ch.Items, i)
 		}
 
