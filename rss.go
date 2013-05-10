@@ -134,6 +134,9 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 
 		itemcount := len(ch.Items)
 		list = node.SelectNodes(ns, "item")
+		if len(list) == 0 {
+			list = doc.SelectNodes(ns, "item")
+		}
 
 		for _, item := range list {
 			if haveItem(ch, item.S(ns, "pubDate"),
@@ -183,6 +186,15 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 				i.Source = new(Source)
 				i.Source.Url = src.As(ns, "url")
 				i.Source.Text = src.Value
+			}
+
+			tl = item.SelectNodes("http://purl.org/rss/1.0/modules/content/", "*")
+			for _, lv := range tl {
+				if lv.Name.Local == "encoded" {
+					i.Content = new(Content)
+					i.Content.Text = lv.String()
+					break
+				}
 			}
 
 			ch.Items = append(ch.Items, i)
