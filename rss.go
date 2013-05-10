@@ -134,6 +134,9 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 
 		itemcount := len(ch.Items)
 		list = node.SelectNodes(ns, "item")
+		if len(list) == 0 {
+			list = doc.SelectNodes(ns, "item")
+		}
 
 		for _, item := range list {
 			if haveItem(ch, item.S(ns, "pubDate"),
