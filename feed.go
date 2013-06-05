@@ -183,7 +183,7 @@ func (this *Feed) CanUpdate() bool {
 
 	// If skipDays or skipHours are set in the RSS feed, use these to see if
 	// we can update.
-	if len(this.Channels) == 0 && this.Type == "rss" {
+	if len(this.Channels) == 1 && this.Type == "rss" {
 		if this.EnforceCacheLimit && len(this.Channels[0].SkipDays) > 0 {
 			for _, v := range this.Channels[0].SkipDays {
 				if time.Weekday(v) == utc.Weekday() {
