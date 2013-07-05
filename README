@@ -13,7 +13,7 @@ Supported feeds are:
 The package allows us to maintain cache timeout management. This prevents us
 from querying the servers for feed updates too often and risk ip bans. Apart 
 from setting a cache timeout manually, the package also optionally adheres to
-the TTL, SkipDays and SkipHours values specied in the feeds themselves.
+the TTL, SkipDays and SkipHours values specified in the feeds themselves.
 
 Note that the TTL, SkipDays and SkipHour fields are only part of the RSS spec.
 For Atom feeds, we use the CacheTimeout in the Feed struct.
