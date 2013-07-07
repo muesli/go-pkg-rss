@@ -28,26 +28,6 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 		return nil
 	}
 
-	haveItem := func(ch *Channel, pubdate, title, desc string) bool {
-		for _, item := range ch.Items {
-			switch {
-			case len(pubdate) > 0:
-				if item.PubDate == pubdate {
-					return true
-				}
-			case len(title) > 0:
-				if item.Title == title {
-					return true
-				}
-			case len(desc) > 0:
-				if item.Description == desc {
-					return true
-				}
-			}
-		}
-		return false
-	}
-
 	var ch *Channel
 	var i *Item
 	var n *xmlx.Node
@@ -139,11 +119,6 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 		}
 
 		for _, item := range list {
-			if haveItem(ch, item.S(ns, "pubDate"),
-				item.S(ns, "title"), item.S(ns, "description")) {
-				continue
-			}
-
 			i = new(Item)
 			i.Title = item.S(ns, "title")
 			i.Description = item.S(ns, "description")
