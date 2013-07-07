@@ -159,7 +159,9 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 				i.Author = Author{}
 				i.Author.Name = n.Value
 			}
-            i.Author.Name = item.S(ns, "creator")
+			if n = item.SelectNode(ns, "creator"); n != nil {
+				i.Author = Author{ Name: n.Value }
+			}
 
 			i.Comments = item.S(ns, "comments")
 			i.Guid = item.S(ns, "guid")
