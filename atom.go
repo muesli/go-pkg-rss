@@ -22,26 +22,6 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 		return nil
 	}
 
-	haveItem := func(ch *Channel, id, title, desc string) bool {
-		for _, item := range ch.Items {
-			switch {
-			case len(id) > 0:
-				if item.Id == id {
-					return true
-				}
-			case len(title) > 0:
-				if item.Title == title {
-					return true
-				}
-			case len(desc) > 0:
-				if item.Description == desc {
-					return true
-				}
-			}
-		}
-		return false
-	}
-
 	var ch *Channel
 	var i *Item
 	var tn *xmlx.Node
@@ -91,10 +71,6 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 		list = node.SelectNodes(ns, "entry")
 
 		for _, item := range list {
-			if haveItem(ch, item.S(ns, "id"), item.S(ns, "title"), item.S(ns, "summary")) {
-				continue
-			}
-
 			i = new(Item)
 			i.Title = item.S(ns, "title")
 			i.Id = item.S(ns, "id")
