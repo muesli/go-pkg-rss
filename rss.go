@@ -46,7 +46,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 		ch.Links = make([]Link, len(list))
 
 		for i, v := range list {
-			ch.Links[i].Href = v.Value
+			ch.Links[i].Href = v.GetValue()
 		}
 
 		ch.Description = node.S(ns, "description")
@@ -63,12 +63,12 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 		for i, v := range list {
 			ch.Categories[i] = new(Category)
 			ch.Categories[i].Domain = v.As(ns, "domain")
-			ch.Categories[i].Text = v.Value
+			ch.Categories[i].Text = v.GetValue()
 		}
 
 		if n = node.SelectNode(ns, "generator"); n != nil {
 			ch.Generator = Generator{}
-			ch.Generator.Text = n.Value
+			ch.Generator.Text = n.GetValue()
 		}
 
 		ch.TTL = node.I(ns, "ttl")
@@ -83,7 +83,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 		list = node.SelectNodes(ns, "days")
 		ch.SkipDays = make([]int, len(list))
 		for i, v := range list {
-			ch.SkipDays[i] = days[v.Value]
+			ch.SkipDays[i] = days[v.GetValue()]
 		}
 
 		if n = node.SelectNode(ns, "image"); n != nil {
@@ -126,16 +126,16 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 			tl = item.SelectNodes(ns, "link")
 			for _, v := range tl {
 				lnk := new(Link)
-				lnk.Href = v.Value
+				lnk.Href = v.GetValue()
 				i.Links = append(i.Links, lnk)
 			}
 
 			if n = item.SelectNode(ns, "author"); n != nil {
 				i.Author = Author{}
-				i.Author.Name = n.Value
+				i.Author.Name = n.GetValue()
 			}
 			if n = item.SelectNode(ns, "creator"); n != nil {
-				i.Author = Author{ Name: n.Value }
+				i.Author = Author{ Name: n.GetValue() }
 			}
 
 			i.Comments = item.S(ns, "comments")
@@ -146,7 +146,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 			for _, lv := range tl {
 				cat := new(Category)
 				cat.Domain = lv.As(ns, "domain")
-				cat.Text = lv.Value
+				cat.Text = lv.GetValue()
 				i.Categories = append(i.Categories, cat)
 			}
 
@@ -162,7 +162,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 			if src := item.SelectNode(ns, "source"); src != nil {
 				i.Source = new(Source)
 				i.Source.Url = src.As(ns, "url")
-				i.Source.Text = src.Value
+				i.Source.Text = src.GetValue()
 			}
 
 			tl = item.SelectNodes("http://purl.org/rss/1.0/modules/content/", "*")
