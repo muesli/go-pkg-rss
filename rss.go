@@ -1,6 +1,10 @@
 package feeder
 
-import xmlx "github.com/jteeuwen/go-pkg-xmlx"
+import (
+	"errors"
+
+	xmlx "github.com/jteeuwen/go-pkg-xmlx"
+)
 
 func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 	days := make(map[string]int)
@@ -34,7 +38,16 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 	var list, tl []*xmlx.Node
 	const ns = "*"
 
-	channels := doc.SelectNodes(ns, "channel")
+	root := doc.SelectNode(ns, "rss")
+	if root == nil {
+		root = doc.SelectNode(ns, "RDF")
+	}
+
+	if root == nil {
+		return errors.New("Failed to find rss/rdf node in XML.")
+	}
+
+	channels := root.SelectNodes(ns, "channel")
 	for _, node := range channels {
 		if ch = getChan(node.S(ns, "pubDate"), node.S(ns, "title")); ch == nil {
 			ch = new(Channel)
