@@ -1,8 +1,8 @@
 package feeder
 
 import (
-    "testing"
 	"io/ioutil"
+	"testing"
 )
 
 var items []*Item
@@ -31,9 +31,9 @@ func TestFeed(t *testing.T) {
 
 func Test_AtomAuthor(t *testing.T) {
 	content, err := ioutil.ReadFile("testdata/idownload.atom")
-    if err != nil {
+	if err != nil {
 		t.Errorf("unable to load file")
-    }
+	}
 	feed := New(1, true, chanHandler, itemHandler)
 	err = feed.FetchBytes("http://example.com", content, nil)
 
@@ -45,15 +45,15 @@ func Test_AtomAuthor(t *testing.T) {
 }
 
 func Test_RssAuthor(t *testing.T) {
-    content, _ := ioutil.ReadFile("testdata/boing.rss")
-    feed := New(1, true, chanHandler, itemHandler)
-    feed.FetchBytes("http://example.com", content, nil)
+	content, _ := ioutil.ReadFile("testdata/boing.rss")
+	feed := New(1, true, chanHandler, itemHandler)
+	feed.FetchBytes("http://example.com", content, nil)
 
-    item := items[0]
-    expected := "Cory Doctorow"
-    if item.Author.Name != expected {
-        t.Errorf("Expected author to be %s but found %s", expected, item.Author.Name)
-    }
+	item := items[0]
+	expected := "Cory Doctorow"
+	if item.Author.Name != expected {
+		t.Errorf("Expected author to be %s but found %s", expected, item.Author.Name)
+	}
 }
 
 func Test_CData(t *testing.T) {
@@ -63,7 +63,7 @@ func Test_CData(t *testing.T) {
 
 	item := items[0]
 	expected := `<p>abc<div>"def"</div>ghi`
-    if item.Description != expected {
+	if item.Description != expected {
 		t.Errorf("Expected item.Description to be [%s] but item.Description=[%s]", expected, item.Description)
 	}
 }
@@ -73,6 +73,6 @@ func chanHandler(feed *Feed, newchannels []*Channel) {
 }
 
 func itemHandler(feed *Feed, ch *Channel, newitems []*Item) {
-    items = newitems
+	items = newitems
 	println(len(newitems), "new item(s) in", ch.Title, "of", feed.Url)
 }

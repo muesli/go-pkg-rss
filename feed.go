@@ -165,7 +165,7 @@ func (this *Feed) makeFeed(doc *xmlx.Document) (err error) {
 		this.CacheTimeout = this.Channels[0].TTL
 	}
 
-    return
+	return
 }
 
 // This function returns true or false, depending on whether the CacheTimeout

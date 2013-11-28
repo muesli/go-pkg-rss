@@ -151,7 +151,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 			}
 
 			i.Comments = item.S(ns, "comments")
-			
+
 			guid := item.S(ns, "guid")
 			if len(guid) > 0 {
 				i.Guid = &guid
