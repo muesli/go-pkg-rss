@@ -9,7 +9,7 @@ type Item struct {
 	Categories  []*Category
 	Comments    string
 	Enclosures  []*Enclosure
-	Guid        string
+	Guid        *string
 	PubDate     string
 	Source      *Source
 

@@ -144,15 +144,19 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 			}
 
 			if n = item.SelectNode(ns, "author"); n != nil {
-				i.Author = Author{}
 				i.Author.Name = n.GetValue()
-			}
-			if n = item.SelectNode(ns, "creator"); n != nil {
-				i.Author = Author{ Name: n.GetValue() }
+
+			} else if n = item.SelectNode(ns, "creator"); n != nil {
+				i.Author.Name = n.GetValue()
 			}
 
 			i.Comments = item.S(ns, "comments")
-			i.Guid = item.S(ns, "guid")
+			
+			guid := item.S(ns, "guid")
+			if len(guid) > 0 {
+				i.Guid = &guid
+			}
+
 			i.PubDate = item.S(ns, "pubDate")
 
 			tl = item.SelectNodes(ns, "category")
