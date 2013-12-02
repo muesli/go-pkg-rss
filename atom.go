@@ -71,6 +71,10 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 		list = node.SelectNodes(ns, "entry")
 
 		for _, item := range list {
+			if isItemPresent(ch, item.S(ns, "id"), item.S(ns, "title")) {
+				continue
+			}
+
 			i = new(Item)
 			i.Title = item.S(ns, "title")
 			i.Id = item.S(ns, "id")
@@ -122,4 +126,20 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 		}
 	}
 	return
+}
+
+func isItemPresent(ch *Channel, id, title string) bool {
+	for _, item := range ch.Items {
+		switch {
+		case len(id) > 0:
+			if item.Id == id {
+				return true
+			}
+		case len(title) > 0:
+			if item.Title == title {
+				return true
+			}
+		}
+	}
+	return false
 }
