@@ -150,14 +150,8 @@ func (this *Feed) makeFeed(doc *xmlx.Document) (err error) {
 		return
 	}
 
-	chancount := len(this.Channels)
 	if err = this.buildFeed(doc); err != nil || len(this.Channels) == 0 {
 		return
-	}
-
-	// Notify host of new channels
-	if chancount != len(this.Channels) && this.chanhandler != nil {
-		this.chanhandler(this, this.Channels[chancount:])
 	}
 
 	// reset cache timeout values according to feed specified values (TTL)
