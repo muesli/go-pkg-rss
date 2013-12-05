@@ -1,5 +1,10 @@
 package feeder
 
+import (
+	"crypto/md5"
+	"io"
+)
+
 type Item struct {
 	// RSS and Shared fields
 	Title       string
@@ -26,7 +31,11 @@ func (i *Item) Key() string {
 		return *i.Guid
 	case len(i.Id) != 0:
 		return i.Id
-	default:
+	case len(i.Title) > 0 && len(i.PubDate) > 0:
 		return i.Title + i.PubDate
+	default:
+		h := md5.New()
+		io.WriteString(h, i.Description)
+		return string(h.Sum(nil))
 	}
 }
