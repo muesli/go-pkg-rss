@@ -29,6 +29,26 @@ func TestFeed(t *testing.T) {
 	}
 }
 
+func Test_NewItem(t *testing.T) {
+	content, _ := ioutil.ReadFile("testdata/initial.atom")
+	feed := New(1, true, chanHandler, itemHandler)
+	err := feed.FetchBytes("http://example.com", content, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	content, _ = ioutil.ReadFile("testdata/initial_plus_one_new.atom")
+	feed.FetchBytes("http://example.com", content, nil)
+	expected := "Second title"
+	if len(items) != 1 {
+		t.Errorf("Expected %s new item, got %s", 1, len(items))
+	}
+
+	if expected != items[0].Title {
+		t.Errorf("Expected %s, got %s", expected, items[0].Title)
+	}
+}
+
 func Test_AtomAuthor(t *testing.T) {
 	content, err := ioutil.ReadFile("testdata/idownload.atom")
 	if err != nil {
