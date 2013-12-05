@@ -181,12 +181,12 @@ func (this *Feed) notifyListeners() {
 				newitems = append(newitems, item)
 			}
 		}
-		if len(newitems) > 0 {
+		if len(newitems) > 0 && this.itemhandler != nil {
 			this.itemhandler(this, channel, newitems)
 		}
 	}
 
-	if len(newchannels) > 0 {
+	if len(newchannels) > 0 && this.chanhandler != nil {
 		this.chanhandler(this, newchannels)
 	}
 }
