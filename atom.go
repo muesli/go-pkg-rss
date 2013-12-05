@@ -50,7 +50,6 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 			ch.Author.Email = tn.S("", "email")
 		}
 
-		itemcount := len(ch.Items)
 		list = node.SelectNodes(ns, "entry")
 
 		for _, item := range list {
@@ -98,10 +97,6 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 			}
 
 			ch.Items = append(ch.Items, i)
-		}
-
-		if itemcount != len(ch.Items) && this.itemhandler != nil {
-			this.itemhandler(this, ch, ch.Items[itemcount:])
 		}
 	}
 	this.Channels = foundChannels
