@@ -37,7 +37,7 @@ func Test_AtomAuthor(t *testing.T) {
 	feed := New(1, true, chanHandler, itemHandler)
 	err = feed.FetchBytes("http://example.com", content, nil)
 
-	item := items[0]
+	item := feed.Channels[0].Items[0]
 	expected := "Cody Lee"
 	if item.Author.Name != expected {
 		t.Errorf("Expected author to be %s but found %s", expected, item.Author.Name)
@@ -49,7 +49,7 @@ func Test_RssAuthor(t *testing.T) {
 	feed := New(1, true, chanHandler, itemHandler)
 	feed.FetchBytes("http://example.com", content, nil)
 
-	item := items[0]
+	item := feed.Channels[0].Items[0]
 	expected := "Cory Doctorow"
 	if item.Author.Name != expected {
 		t.Errorf("Expected author to be %s but found %s", expected, item.Author.Name)
@@ -61,7 +61,7 @@ func Test_CData(t *testing.T) {
 	feed := New(1, true, chanHandler, itemHandler)
 	feed.FetchBytes("http://example.com", content, nil)
 
-	item := items[0]
+	item := feed.Channels[0].Items[0]
 	expected := `<p>abc<div>"def"</div>ghi`
 	if item.Description != expected {
 		t.Errorf("Expected item.Description to be [%s] but item.Description=[%s]", expected, item.Description)
