@@ -6,32 +6,15 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 	ns := "http://www.w3.org/2005/Atom"
 	channels := doc.SelectNodes(ns, "feed")
 
-	getChan := func(id, title string) *Channel {
-		for _, c := range this.Channels {
-			switch {
-			case len(id) > 0:
-				if c.Id == id {
-					return c
-				}
-			case len(title) > 0:
-				if c.Title == title {
-					return c
-				}
-			}
-		}
-		return nil
-	}
-
+	var foundChannels []*Channel
 	var ch *Channel
 	var i *Item
 	var tn *xmlx.Node
 	var list []*xmlx.Node
 
 	for _, node := range channels {
-		if ch = getChan(node.S(ns, "id"), node.S(ns, "title")); ch == nil {
-			ch = new(Channel)
-			this.Channels = append(this.Channels, ch)
-		}
+		ch = new(Channel)
+		foundChannels = append(foundChannels, ch)
 
 		ch.Title = node.S(ns, "title")
 		ch.LastBuildDate = node.S(ns, "updated")
@@ -121,5 +104,6 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 			this.itemhandler(this, ch, ch.Items[itemcount:])
 		}
 	}
+	this.Channels = foundChannels
 	return
 }
