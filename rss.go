@@ -6,15 +6,17 @@ import (
 	xmlx "github.com/jteeuwen/go-pkg-xmlx"
 )
 
+var days = map[string]int{
+	"Monday":    1,
+	"Tuesday":   2,
+	"Wednesday": 3,
+	"Thursday":  4,
+	"Friday":    5,
+	"Saturday":  6,
+	"Sunday":    7,
+}
+
 func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
-	days := make(map[string]int)
-	days["Monday"] = 1
-	days["Tuesday"] = 2
-	days["Wednesday"] = 3
-	days["Thursday"] = 4
-	days["Friday"] = 5
-	days["Saturday"] = 6
-	days["Sunday"] = 7
 
 	getChan := func(pubdate, title string) *Channel {
 		for _, c := range this.Channels {
