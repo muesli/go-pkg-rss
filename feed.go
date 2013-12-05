@@ -171,13 +171,13 @@ func (this *Feed) makeFeed(doc *xmlx.Document) (err error) {
 func (this *Feed) notifyListeners() {
 	var newchannels []*Channel
 	for _, channel := range this.Channels {
-		if this.database.request <- channel.Title; <-this.database.response {
+		if this.database.request <- channel.Key(); !<-this.database.response {
 			newchannels = append(newchannels, channel)
 		}
 
 		var newitems []*Item
 		for _, item := range channel.Items {
-			if this.database.request <- item.Title; <-this.database.response {
+			if this.database.request <- item.Key(); !<-this.database.response {
 				newitems = append(newitems, item)
 			}
 		}

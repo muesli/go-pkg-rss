@@ -28,3 +28,12 @@ type Channel struct {
 	Author   Author
 	SubTitle SubTitle
 }
+
+func (c *Channel) Key() string {
+	switch {
+	case len(c.Id) != 0:
+		return c.Id
+	default:
+		return c.Title
+	}
+}

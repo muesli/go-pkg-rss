@@ -19,3 +19,14 @@ type Item struct {
 	Contributors []string
 	Content      *Content
 }
+
+func (i *Item) Key() string {
+	switch {
+	case i.Guid != nil && len(*i.Guid) != 0:
+		return *i.Guid
+	case len(i.Id) != 0:
+		return i.Id
+	default:
+		return i.Title + i.PubDate
+	}
+}
