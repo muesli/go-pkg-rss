@@ -58,6 +58,9 @@ type Feed struct {
 	// Url from which this feed was created.
 	Url string
 
+	// Database containing a list of known Items and Channels for this instance
+	database *database
+
 	// A notification function, used to notify the host when a new channel
 	// has been found.
 	chanhandler ChannelHandler
@@ -76,6 +79,7 @@ func New(cachetimeout int, enforcecachelimit bool, ch ChannelHandler, ih ItemHan
 	v.CacheTimeout = cachetimeout
 	v.EnforceCacheLimit = enforcecachelimit
 	v.Type = "none"
+	v.database = NewDatabase()
 	v.chanhandler = ch
 	v.itemhandler = ih
 	return v
@@ -150,14 +154,8 @@ func (this *Feed) makeFeed(doc *xmlx.Document) (err error) {
 		return
 	}
 
-	chancount := len(this.Channels)
 	if err = this.buildFeed(doc); err != nil || len(this.Channels) == 0 {
 		return
-	}
-
-	// Notify host of new channels
-	if chancount != len(this.Channels) && this.chanhandler != nil {
-		this.chanhandler(this, this.Channels[chancount:])
 	}
 
 	// reset cache timeout values according to feed specified values (TTL)
@@ -165,7 +163,32 @@ func (this *Feed) makeFeed(doc *xmlx.Document) (err error) {
 		this.CacheTimeout = this.Channels[0].TTL
 	}
 
+	this.notifyListeners()
+
 	return
+}
+
+func (this *Feed) notifyListeners() {
+	var newchannels []*Channel
+	for _, channel := range this.Channels {
+		if this.database.request <- channel.Key(); !<-this.database.response {
+			newchannels = append(newchannels, channel)
+		}
+
+		var newitems []*Item
+		for _, item := range channel.Items {
+			if this.database.request <- item.Key(); !<-this.database.response {
+				newitems = append(newitems, item)
+			}
+		}
+		if len(newitems) > 0 && this.itemhandler != nil {
+			this.itemhandler(this, channel, newitems)
+		}
+	}
+
+	if len(newchannels) > 0 && this.chanhandler != nil {
+		this.chanhandler(this, newchannels)
+	}
 }
 
 // This function returns true or false, depending on whether the CacheTimeout

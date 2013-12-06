@@ -6,32 +6,18 @@ import (
 	xmlx "github.com/jteeuwen/go-pkg-xmlx"
 )
 
+var days = map[string]int{
+	"Monday":    1,
+	"Tuesday":   2,
+	"Wednesday": 3,
+	"Thursday":  4,
+	"Friday":    5,
+	"Saturday":  6,
+	"Sunday":    7,
+}
+
 func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
-	days := make(map[string]int)
-	days["Monday"] = 1
-	days["Tuesday"] = 2
-	days["Wednesday"] = 3
-	days["Thursday"] = 4
-	days["Friday"] = 5
-	days["Saturday"] = 6
-	days["Sunday"] = 7
-
-	getChan := func(pubdate, title string) *Channel {
-		for _, c := range this.Channels {
-			switch {
-			case len(pubdate) > 0:
-				if c.PubDate == pubdate {
-					return c
-				}
-			case len(title) > 0:
-				if c.Title == title {
-					return c
-				}
-			}
-		}
-		return nil
-	}
-
+	var foundChannels []*Channel
 	var ch *Channel
 	var i *Item
 	var n *xmlx.Node
@@ -49,10 +35,8 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 
 	channels := root.SelectNodes(ns, "channel")
 	for _, node := range channels {
-		if ch = getChan(node.S(ns, "pubDate"), node.S(ns, "title")); ch == nil {
-			ch = new(Channel)
-			this.Channels = append(this.Channels, ch)
-		}
+		ch = new(Channel)
+		foundChannels = append(foundChannels, ch)
 
 		ch.Title = node.S(ns, "title")
 		list = node.SelectNodes(ns, "link")
@@ -125,7 +109,6 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 			ch.TextInput.Link = n.S(ns, "link")
 		}
 
-		itemcount := len(ch.Items)
 		list = node.SelectNodes(ns, "item")
 		if len(list) == 0 {
 			list = doc.SelectNodes(ns, "item")
@@ -193,10 +176,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 
 			ch.Items = append(ch.Items, i)
 		}
-
-		if itemcount != len(ch.Items) && this.itemhandler != nil {
-			this.itemhandler(this, ch, ch.Items[itemcount:])
-		}
 	}
+	this.Channels = foundChannels
 	return
 }

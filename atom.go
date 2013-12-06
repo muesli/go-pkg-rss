@@ -6,32 +6,15 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 	ns := "http://www.w3.org/2005/Atom"
 	channels := doc.SelectNodes(ns, "feed")
 
-	getChan := func(id, title string) *Channel {
-		for _, c := range this.Channels {
-			switch {
-			case len(id) > 0:
-				if c.Id == id {
-					return c
-				}
-			case len(title) > 0:
-				if c.Title == title {
-					return c
-				}
-			}
-		}
-		return nil
-	}
-
+	var foundChannels []*Channel
 	var ch *Channel
 	var i *Item
 	var tn *xmlx.Node
 	var list []*xmlx.Node
 
 	for _, node := range channels {
-		if ch = getChan(node.S(ns, "id"), node.S(ns, "title")); ch == nil {
-			ch = new(Channel)
-			this.Channels = append(this.Channels, ch)
-		}
+		ch = new(Channel)
+		foundChannels = append(foundChannels, ch)
 
 		ch.Title = node.S(ns, "title")
 		ch.LastBuildDate = node.S(ns, "updated")
@@ -67,14 +50,9 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 			ch.Author.Email = tn.S("", "email")
 		}
 
-		itemcount := len(ch.Items)
 		list = node.SelectNodes(ns, "entry")
 
 		for _, item := range list {
-			if isItemPresent(ch, item.S(ns, "id"), item.S(ns, "title")) {
-				continue
-			}
-
 			i = new(Item)
 			i.Title = item.S(ns, "title")
 			i.Id = item.S(ns, "id")
@@ -120,26 +98,7 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 
 			ch.Items = append(ch.Items, i)
 		}
-
-		if itemcount != len(ch.Items) && this.itemhandler != nil {
-			this.itemhandler(this, ch, ch.Items[itemcount:])
-		}
 	}
+	this.Channels = foundChannels
 	return
-}
-
-func isItemPresent(ch *Channel, id, title string) bool {
-	for _, item := range ch.Items {
-		switch {
-		case len(id) > 0:
-			if item.Id == id {
-				return true
-			}
-		case len(title) > 0:
-			if item.Title == title {
-				return true
-			}
-		}
-	}
-	return false
 }
