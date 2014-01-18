@@ -81,7 +81,7 @@ func Test_Extensions(t *testing.T) {
 	feed := New(1, true, chanHandler, itemHandler)
 	feed.FetchBytes("http://example.com", content, nil)
 
-	extension := feed.Channels[0].Items[0].Extensions["http://www.sec.gov/Archives/edgar"]
+	extension := feed.Channels[0].Items[0].Extensions["http://www.sec.gov/Archives/edgar"][0]
 
 	companyExpected := "Cellular Biomedicine Group, Inc."
 	companyName := *extension.Childrens[0]

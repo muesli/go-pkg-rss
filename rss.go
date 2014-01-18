@@ -182,11 +182,11 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 			}
 
 			tl = item.SelectNodes("*", "*")
-			i.Extensions = make(map[string]*Extension)
+			i.Extensions = make(map[string][]*Extension)
 			for _, lv := range tl {
 				e, ok := getExtension(lv)
 				if ok {
-					i.Extensions[lv.Name.Space] = e
+					i.Extensions[lv.Name.Space] = append(i.Extensions[lv.Name.Space], e)
 				}
 			}
 
@@ -202,6 +202,7 @@ func getExtension(node *xmlx.Node) (*Extension, bool) {
 		var extension Extension
 		extension = Extension{Name: node.Name.Local, Value: node.GetValue()}
 		extension.Attrs = make(map[string]string)
+
 		for _, x := range node.Attributes {
 			extension.Attrs[x.Name.Local] = x.Value
 		}
