@@ -6,6 +6,13 @@ import (
 	xmlx "github.com/jteeuwen/go-pkg-xmlx"
 )
 
+type Extension struct {
+	Name      string
+	Value     string
+	Attrs     map[string]string
+	Childrens []*Extension
+}
+
 var days = map[string]int{
 	"Monday":    1,
 	"Tuesday":   2,
@@ -174,9 +181,39 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 				}
 			}
 
+			tl = item.SelectNodes("*", "*")
+			i.Extensions = make(map[string]*Extension)
+			for _, lv := range tl {
+				e, ok := getExtension(lv)
+				if ok {
+					i.Extensions[lv.Name.Space] = e
+				}
+			}
+
 			ch.Items = append(ch.Items, i)
 		}
 	}
 	this.Channels = foundChannels
 	return
+}
+
+func getExtension(node *xmlx.Node) (*Extension, bool) {
+	if node.Name.Space != "" {
+		var extension Extension
+		extension = Extension{Name: node.Name.Local, Value: node.GetValue()}
+		extension.Attrs = make(map[string]string)
+		for _, x := range node.Attributes {
+			extension.Attrs[x.Name.Local] = x.Value
+		}
+
+		for _, y := range node.Children {
+			if c, ok := getExtension(y); ok {
+				extension.Childrens = append(extension.Childrens, c)
+			}
+		}
+
+		return &extension, true
+	} else {
+		return nil, false
+	}
 }
