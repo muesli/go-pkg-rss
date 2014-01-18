@@ -89,15 +89,15 @@ func Test_CData(t *testing.T) {
 }
 
 func Test_Link(t *testing.T) {
-	content, _ := ioutil.ReadFile("testdata/ignoredLink.rss")
+	content, _ := ioutil.ReadFile("testdata/nytimes.rss")
 	feed := New(1, true, chanHandler, itemHandler)
 	feed.FetchBytes("http://example.com", content, nil)
 
 	channel := feed.Channels[0]
 	item := channel.Items[0]
 
-	channelLinkExpected := "http://www.conservatives.com/XMLGateway/RSS/News.xml"
-	itemLinkExpected := "http://www.conservatives.com/News/News_stories/2013/09/Dr_Tania_Mathias_chosen_to_stand_up_for_local_people_in_Twickenham.aspx"
+	channelLinkExpected := "http://www.nytimes.com/services/xml/rss/nyt/US.xml"
+	itemLinkExpected := "http://www.nytimes.com/2014/01/18/technology/in-keeping-grip-on-data-pipeline-obama-does-little-to-reassure-industry.html?partner=rss&emc=rss"
 
 	if channel.Links[0].Href != channelLinkExpected {
 		t.Errorf("Expected author to be %s but found %s", channelLinkExpected, channel.Links[0].Href)
