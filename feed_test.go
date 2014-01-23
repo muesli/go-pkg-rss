@@ -76,26 +76,26 @@ func Test_RssAuthor(t *testing.T) {
 	}
 }
 
-func Test_Extensions(t *testing.T) {
+func Test_ItemExtensions(t *testing.T) {
 	content, _ := ioutil.ReadFile("testdata/extension.rss")
 	feed := New(1, true, chanHandler, itemHandler)
 	feed.FetchBytes("http://example.com", content, nil)
 
-	extension := feed.Channels[0].Items[0].Extensions["http://www.sec.gov/Archives/edgar"][0]
+	edgarExtension := feed.Channels[0].Items[0].Extensions["http://www.sec.gov/Archives/edgar"]
 
 	companyExpected := "Cellular Biomedicine Group, Inc."
-	companyName := *extension.Childrens[0]
+	companyName := edgarExtension["companyName"][0]
 	if companyName.Value != companyExpected {
 		t.Errorf("Expected company to be %s but found %s", companyExpected, companyName.Value)
 	}
 
-	files := *extension.Childrens[11]
+	files := edgarExtension["xbrlFiles"][0].Childrens["xbrlFile"]
 	fileSizeExpected := 10
-	if len(files.Childrens) != 10 {
-		t.Errorf("Expected files size to be %s but found %s", fileSizeExpected, len(files.Childrens))
+	if len(files) != 10 {
+		t.Errorf("Expected files size to be %s but found %s", fileSizeExpected, len(files))
 	}
 
-	file := *files.Childrens[0]
+	file := files[0]
 	fileExpected := "cbmg_10qa.htm"
 	if file.Attrs["file"] != fileExpected {
 		t.Errorf("Expected file to be %s but found %s", fileExpected, len(file.Attrs["file"]))

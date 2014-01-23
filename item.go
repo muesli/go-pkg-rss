@@ -24,7 +24,7 @@ type Item struct {
 	Contributors []string
 	Content      *Content
 
-	Extensions map[string][]*Extension
+	Extensions map[string]map[string][]Extension
 }
 
 func (i *Item) Key() string {

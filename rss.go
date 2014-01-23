@@ -10,7 +10,7 @@ type Extension struct {
 	Name      string
 	Value     string
 	Attrs     map[string]string
-	Childrens []*Extension
+	Childrens map[string][]Extension
 }
 
 var days = map[string]int{
@@ -182,11 +182,11 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 			}
 
 			tl = item.SelectNodes("*", "*")
-			i.Extensions = make(map[string][]*Extension)
+			i.Extensions = make(map[string]map[string][]Extension)
 			for _, lv := range tl {
-				e, ok := getExtension(lv)
+				e, ok := getExtentions(lv)
 				if ok {
-					i.Extensions[lv.Name.Space] = append(i.Extensions[lv.Name.Space], e)
+					i.Extensions[lv.Name.Space] = e
 				}
 			}
 
@@ -197,24 +197,39 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 	return
 }
 
-func getExtension(node *xmlx.Node) (*Extension, bool) {
+func getExtentions(node *xmlx.Node) (extentions map[string][]Extension, ok bool) {
+	extentions = make(map[string][]Extension, 0)
 	if node.Name.Space != "" {
-		var extension Extension
+		for _, y := range node.Children {
+			extension, ok := getExtention(y)
+			if ok {
+				extentions[y.Name.Local] = append(extentions[y.Name.Local], extension)
+			}
+		}
+		ok = true
+	} else {
+		ok = false
+	}
+	return
+}
+
+func getExtention(node *xmlx.Node) (Extension, bool) {
+	var extension Extension
+	if node.Name.Space != "" {
 		extension = Extension{Name: node.Name.Local, Value: node.GetValue()}
 		extension.Attrs = make(map[string]string)
-
+		extension.Childrens = make(map[string][]Extension, 0)
 		for _, x := range node.Attributes {
 			extension.Attrs[x.Name.Local] = x.Value
 		}
-
 		for _, y := range node.Children {
-			if c, ok := getExtension(y); ok {
-				extension.Childrens = append(extension.Childrens, c)
+			children, ok := getExtention(y)
+			if ok {
+				extension.Childrens[y.Name.Local] = append(extension.Childrens[y.Name.Local], children)
 			}
 		}
-
-		return &extension, true
+		return extension, true
 	} else {
-		return nil, false
+		return extension, false
 	}
 }
