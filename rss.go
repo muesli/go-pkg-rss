@@ -181,13 +181,10 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 				}
 			}
 
-			tl = item.SelectNodes("*", "*")
+			tl = item.SelectNodes(ns, ns)
 			i.Extensions = make(map[string]map[string][]Extension)
 			for _, lv := range tl {
-				e, ok := getExtentions(lv)
-				if ok {
-					i.Extensions[lv.Name.Space] = e
-				}
+				getExtensions(&i.Extensions, lv)
 			}
 
 			ch.Items = append(ch.Items, i)
@@ -197,23 +194,24 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 	return
 }
 
-func getExtentions(node *xmlx.Node) (extentions map[string][]Extension, ok bool) {
-	extentions = make(map[string][]Extension, 0)
+func getExtensions(extensionsX *map[string]map[string][]Extension, node *xmlx.Node) {
+	extentions := *extensionsX
+
 	if node.Name.Space != "" {
-		for _, y := range node.Children {
-			extension, ok := getExtention(y)
-			if ok {
-				extentions[y.Name.Local] = append(extentions[y.Name.Local], extension)
+		extensione, noErrors := getExtension(node)
+		if noErrors {
+			if len(extentions[node.Name.Space]) == 0 {
+				extentions[node.Name.Space] = make(map[string][]Extension, 0)
 			}
+			if len(extentions[node.Name.Space][node.Name.Local]) == 0 {
+				extentions[node.Name.Space][node.Name.Local] = make([]Extension, 0)
+			}
+			extentions[node.Name.Space][node.Name.Local] = append(extentions[node.Name.Space][node.Name.Local], extensione)
 		}
-		ok = true
-	} else {
-		ok = false
 	}
-	return
 }
 
-func getExtention(node *xmlx.Node) (Extension, bool) {
+func getExtension(node *xmlx.Node) (Extension, bool) {
 	var extension Extension
 	if node.Name.Space != "" {
 		extension = Extension{Name: node.Name.Local, Value: node.GetValue()}
@@ -223,7 +221,7 @@ func getExtention(node *xmlx.Node) (Extension, bool) {
 			extension.Attrs[x.Name.Local] = x.Value
 		}
 		for _, y := range node.Children {
-			children, ok := getExtention(y)
+			children, ok := getExtension(y)
 			if ok {
 				extension.Childrens[y.Name.Local] = append(extension.Childrens[y.Name.Local], children)
 			}

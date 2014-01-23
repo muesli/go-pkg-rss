@@ -81,15 +81,14 @@ func Test_ItemExtensions(t *testing.T) {
 	feed := New(1, true, chanHandler, itemHandler)
 	feed.FetchBytes("http://example.com", content, nil)
 
-	edgarExtension := feed.Channels[0].Items[0].Extensions["http://www.sec.gov/Archives/edgar"]
-
+	edgarExtensionxbrlFiling := feed.Channels[0].Items[0].Extensions["http://www.sec.gov/Archives/edgar"]["xbrlFiling"][0].Childrens
 	companyExpected := "Cellular Biomedicine Group, Inc."
-	companyName := edgarExtension["companyName"][0]
+	companyName := edgarExtensionxbrlFiling["companyName"][0]
 	if companyName.Value != companyExpected {
 		t.Errorf("Expected company to be %s but found %s", companyExpected, companyName.Value)
 	}
 
-	files := edgarExtension["xbrlFiles"][0].Childrens["xbrlFile"]
+	files := edgarExtensionxbrlFiling["xbrlFiles"][0].Childrens["xbrlFile"]
 	fileSizeExpected := 10
 	if len(files) != 10 {
 		t.Errorf("Expected files size to be %s but found %s", fileSizeExpected, len(files))
