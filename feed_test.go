@@ -101,6 +101,36 @@ func Test_ItemExtensions(t *testing.T) {
 	}
 }
 
+func Test_ChannelExtensions(t *testing.T) {
+	content, _ := ioutil.ReadFile("testdata/extension.rss")
+	feed := New(1, true, chanHandler, itemHandler)
+	feed.FetchBytes("http://example.com", content, nil)
+
+	channel := feed.Channels[0]
+	itunesExtentions := channel.Extensions["http://www.itunes.com/dtds/podcast-1.0.dtd"]
+
+	authorExptected := "The Author"
+	ownerEmailExpected := "test@rss.com"
+	categoryExpected := "Politics"
+	imageExptected := "http://golang.org/doc/gopher/project.png"
+
+	if itunesExtentions["author"][0].Value != authorExptected {
+		t.Errorf("Expected author to be %s but found %s", authorExptected, itunesExtentions["author"][0].Value)
+	}
+
+	if itunesExtentions["owner"][0].Childrens["email"][0].Value != ownerEmailExpected {
+		t.Errorf("Expected owner email to be %s but found %s", ownerEmailExpected, itunesExtentions["owner"][0].Childrens["email"][0].Value)
+	}
+
+	if itunesExtentions["category"][0].Attrs["text"] != categoryExpected {
+		t.Errorf("Expected category text to be %s but found %s", categoryExpected, itunesExtentions["category"][0].Attrs["text"])
+	}
+
+	if itunesExtentions["image"][0].Attrs["href"] != imageExptected {
+		t.Errorf("Expected image href to be %s but found %s", imageExptected, itunesExtentions["image"][0].Attrs["href"])
+	}
+}
+
 func Test_CData(t *testing.T) {
 	content, _ := ioutil.ReadFile("testdata/iosBoardGameGeek.rss")
 	feed := New(1, true, chanHandler, itemHandler)

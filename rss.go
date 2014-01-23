@@ -189,6 +189,15 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 
 			ch.Items = append(ch.Items, i)
 		}
+
+		x := node.SelectNodes(ns, ns)
+		ch.Extensions = make(map[string]map[string][]Extension)
+		for _, v := range x {
+			if v.Name.Space != "" {
+				getExtensions(&ch.Extensions, v)
+			}
+		}
+
 	}
 	this.Channels = foundChannels
 	return

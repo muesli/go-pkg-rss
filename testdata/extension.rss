@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0">
+<rss version="2.0"  xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
   <channel>
     <title>Extensions Test</title>
     <link>http://test.extensions.net</link>
@@ -11,6 +11,13 @@
       <url>http://test.extensions.net/test.jpg</url>
       <title>Extensions Test</title>
     </image>
+    <itunes:author>The Author</itunes:author>
+    <itunes:owner>
+      <itunes:name></itunes:name>
+      <itunes:email>test@rss.com</itunes:email>
+    </itunes:owner>
+    <itunes:category text="Politics"></itunes:category>
+    <itunes:image href="http://golang.org/doc/gopher/project.png" />
     <item>
       <title>Cellular Biomedicine Group, Inc. (0001378624) (Filer)</title>
       <link>http://www.sec.gov/Archives/edgar/data/1378624/000135448813006749/0001354488-13-006749-index.htm</link>
