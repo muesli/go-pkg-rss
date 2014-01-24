@@ -35,5 +35,5 @@ an example of how this works.
 ## USAGE
 
 
-An idiomatic example program can be found in example.go.
+An idiomatic example program can be found in [testdata/example.go](https://github.com/jteeuwen/go-pkg-rss/blob/master/testdata/example.go).
 
