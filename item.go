@@ -3,6 +3,7 @@ package feeder
 import (
 	"crypto/md5"
 	"io"
+    "time"
 )
 
 type Item struct {
@@ -15,7 +16,7 @@ type Item struct {
 	Comments    string
 	Enclosures  []*Enclosure
 	Guid        *string
-	PubDate     string
+	PubDate     time.Time
 	Source      *Source
 
 	// Atom specific fields
@@ -33,8 +34,8 @@ func (i *Item) Key() string {
 		return *i.Guid
 	case len(i.Id) != 0:
 		return i.Id
-	case len(i.Title) > 0 && len(i.PubDate) > 0:
-		return i.Title + i.PubDate
+	case len(i.Title) > 0 && !i.PubDate.IsZero():
+		return i.Title + i.PubDate.String()
 	default:
 		h := md5.New()
 		io.WriteString(h, i.Description)

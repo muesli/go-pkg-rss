@@ -162,7 +162,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 				i.Guid = &guid
 			}
 
-			i.PubDate = item.S(ns, "pubDate")
+			i.PubDate, _ = parseTime(item.S(ns, "pubDate"))
 
 			tl = item.SelectNodes(ns, "category")
 			for _, lv := range tl {
