@@ -16,7 +16,7 @@ type Item struct {
 	Comments    string
 	Enclosures  []*Enclosure
 	Guid        *string
-	PubDate     time.Time
+	PubDate     string
 	Source      *Source
 
 	// Atom specific fields
@@ -28,14 +28,18 @@ type Item struct {
 	Extensions map[string]map[string][]Extension
 }
 
+func (i *Item) ParsedPubDate() (time.Time, error) {
+    return parseTime(i.PubDate)
+}
+
 func (i *Item) Key() string {
 	switch {
 	case i.Guid != nil && len(*i.Guid) != 0:
 		return *i.Guid
 	case len(i.Id) != 0:
 		return i.Id
-	case len(i.Title) > 0 && !i.PubDate.IsZero():
-		return i.Title + i.PubDate.String()
+	case len(i.Title) > 0 && len(i.PubDate) > 0:
+		return i.Title + i.PubDate
 	default:
 		h := md5.New()
 		io.WriteString(h, i.Description)
