@@ -3,7 +3,7 @@ package feeder
 import (
 	"crypto/md5"
 	"io"
-    "time"
+	"time"
 )
 
 type Item struct {
@@ -29,7 +29,7 @@ type Item struct {
 }
 
 func (i *Item) ParsedPubDate() (time.Time, error) {
-    return parseTime(i.PubDate)
+	return parseTime(i.PubDate)
 }
 
 func (i *Item) Key() string {
