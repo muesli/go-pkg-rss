@@ -81,6 +81,14 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 				i.Contributors = append(i.Contributors, cv.S("", "name"))
 			}
 
+			list = item.SelectNodes(ns, "category")
+			for _, cv := range list {
+				cat := new(Category)
+				cat.Domain = ""
+				cat.Text = cv.As("", "term")
+				i.Categories = append(i.Categories, cat)
+			}
+
 			if tn = item.SelectNode(ns, "content"); tn != nil {
 				i.Content = new(Content)
 				i.Content.Type = tn.As("", "type")
