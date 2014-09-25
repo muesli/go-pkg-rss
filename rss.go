@@ -1,10 +1,12 @@
 package feeder
 
 import (
-	"errors"
-
 	xmlx "github.com/jteeuwen/go-pkg-xmlx"
 )
+
+type MissingRssNodeError struct{}
+
+func (err *MissingRssNodeError) Error() string { return "Failed to find rss/rdf node in XML." }
 
 type Extension struct {
 	Name      string
@@ -37,7 +39,7 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 	}
 
 	if root == nil {
-		return errors.New("Failed to find rss/rdf node in XML.")
+		return &MissingRssNodeError{}
 	}
 
 	channels := root.SelectNodes(ns, "channel")

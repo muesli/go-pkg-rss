@@ -26,7 +26,6 @@
 package feeder
 
 import (
-	"errors"
 	"fmt"
 	xmlx "github.com/jteeuwen/go-pkg-xmlx"
 	"net/http"
@@ -34,6 +33,15 @@ import (
 	"strings"
 	"time"
 )
+
+type UnsupportedFeedError struct {
+	Type    string
+	Version [2]int
+}
+
+func (err *UnsupportedFeedError) Error() string {
+	return fmt.Sprintf("Unsupported feed: %s, version: %+v", err.Type, err.Version)
+}
 
 type ChannelHandler func(f *Feed, newchannels []*Channel)
 type ItemHandler func(f *Feed, ch *Channel, newitems []*Item)
@@ -150,8 +158,7 @@ func (this *Feed) makeFeed(doc *xmlx.Document) (err error) {
 	this.Type, this.Version = this.GetVersionInfo(doc)
 
 	if ok := this.testVersions(); !ok {
-		err = errors.New(fmt.Sprintf("Unsupported feed: %s, version: %+v", this.Type, this.Version))
-		return
+		return &UnsupportedFeedError{Type: this.Type, Version: this.Version}
 	}
 
 	if err = this.buildFeed(doc); err != nil || len(this.Channels) == 0 {
