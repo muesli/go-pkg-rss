@@ -285,10 +285,14 @@ func (this *Feed) GetVersionInfo(doc *xmlx.Document) (ftype string, fversion [2]
 rss:
 	if node = doc.SelectNode("", "rss"); node != nil {
 		ftype = "rss"
+		major := 0
+		minor := 0
 		version := node.As("", "version")
 		p := strings.Index(version, ".")
-		major, _ := strconv.Atoi(version[0:p])
-		minor, _ := strconv.Atoi(version[p+1 : len(version)])
+		if p != -1 {
+			major, _ = strconv.Atoi(version[0:p])
+			minor, _ = strconv.Atoi(version[p+1 : len(version)])
+		}
 		fversion = [2]int{major, minor}
 		return
 	}
