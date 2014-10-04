@@ -43,8 +43,50 @@ func (err *UnsupportedFeedError) Error() string {
 	return fmt.Sprintf("Unsupported feed: %s, version: %+v", err.Type, err.Version)
 }
 
-type ChannelHandler func(f *Feed, newchannels []*Channel)
-type ItemHandler func(f *Feed, ch *Channel, newitems []*Item)
+type ChannelHandlerFunc func(f *Feed, newchannels []*Channel)
+
+func (h ChannelHandlerFunc) ProcessChannels(f *Feed, newchannels []*Channel) {
+	h(f, newchannels)
+}
+
+type ItemHandlerFunc func(f *Feed, ch *Channel, newitems []*Item)
+
+func (h ItemHandlerFunc) ProcessItems(f *Feed, ch *Channel, newitems []*Item) {
+	h(f, ch, newitems)
+}
+
+type Handler interface {
+	ChannelHandler
+	ItemHandler
+}
+
+type ChannelHandler interface {
+	ProcessChannels(f *Feed, newchannels []*Channel)
+}
+
+type ItemHandler interface {
+	ProcessItems(f *Feed, ch *Channel, newitems []*Item)
+}
+
+type HandlerBonder struct {
+	itemhandler ItemHandler
+	chanhandler ChannelHandler
+}
+
+func (hb *HandlerBonder) ProcessChannels(f *Feed, newchannels []*Channel) {
+	hb.chanhandler.ProcessChannels(f, newchannels)
+}
+
+func (hb *HandlerBonder) ProcessItems(f *Feed, ch *Channel, newitems []*Item) {
+	hb.itemhandler.ProcessItems(f, ch, newitems)
+}
+
+func NewHandlerBonder(chanhandler ChannelHandler, itemhandler ItemHandler) Handler {
+	return &HandlerBonder{
+		itemhandler: itemhandler,
+		chanhandler: chanhandler,
+	}
+}
 
 type Feed struct {
 	// Custom cache timeout in minutes.
@@ -66,30 +108,27 @@ type Feed struct {
 	// Url from which this feed was created.
 	Url string
 
-	// Database containing a list of known Items and Channels for this instance
-	database *database
-
-	// A notification function, used to notify the host when a new channel
-	// has been found.
-	chanhandler ChannelHandler
-
-	// A notification function, used to notify the host when a new item
-	// has been found for a given channel.
-	itemhandler ItemHandler
+	// The channel and item handler
+	handler Handler
 
 	// Last time content was fetched. Used in conjunction with CacheTimeout
 	// to ensure we don't get content too often.
 	lastupdate int64
 }
 
-func New(cachetimeout int, enforcecachelimit bool, ch ChannelHandler, ih ItemHandler) *Feed {
+// New is a helper function to stay semi-compatible with
+// the old code
+func New(cachetimeout int, enforcecachelimit bool, ch ChannelHandlerFunc, ih ItemHandlerFunc) *Feed {
+	return NewWithHandler(cachetimeout, enforcecachelimit, NewHandlerBonder(ch, ih))
+}
+
+// NewWithHandler creates a new feed with a handler
+func NewWithHandler(cachetimeout int, enforcecachelimit bool, h Handler) *Feed {
 	v := new(Feed)
 	v.CacheTimeout = cachetimeout
 	v.EnforceCacheLimit = enforcecachelimit
 	v.Type = "none"
-	v.database = NewDatabase()
-	v.chanhandler = ch
-	v.itemhandler = ih
+	v.handler = h
 	return v
 }
 
@@ -176,25 +215,14 @@ func (this *Feed) makeFeed(doc *xmlx.Document) (err error) {
 }
 
 func (this *Feed) notifyListeners() {
-	var newchannels []*Channel
 	for _, channel := range this.Channels {
-		if this.database.request <- channel.Key(); !<-this.database.response {
-			newchannels = append(newchannels, channel)
-		}
-
-		var newitems []*Item
-		for _, item := range channel.Items {
-			if this.database.request <- item.Key(); !<-this.database.response {
-				newitems = append(newitems, item)
-			}
-		}
-		if len(newitems) > 0 && this.itemhandler != nil {
-			this.itemhandler(this, channel, newitems)
+		if len(channel.Items) > 0 && this.handler != nil {
+			this.handler.ProcessItems(this, channel, channel.Items)
 		}
 	}
 
-	if len(newchannels) > 0 && this.chanhandler != nil {
-		this.chanhandler(this, newchannels)
+	if len(this.Channels) > 0 && this.handler != nil {
+		this.handler.ProcessChannels(this, this.Channels)
 	}
 }
 
