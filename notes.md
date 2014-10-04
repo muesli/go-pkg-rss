@@ -35,13 +35,13 @@ The current database solution contributes the following issues:
 
 ### Proposed solution
 
-Looking across the stdlib provided with Go we can see and example where similar concerns have been met with elegance. The net/http package uses handlers, much like go-pkg-rss does, to off load implementation complexity to outside of the core http package. It also provides batteris included solutions to common problems that developers may have with built in handlers such as a FileServer, a NotFoundHandler, RedirectHandler, StripPrefix and TimeoutHandler. I propose that the current database implementation be stripped from the package and moved to a set of built in handlers called DedupeChannelHandler and DedupeItemHandler.
+Looking across the stdlib provided with Go we can see and example where similar concerns have been met with elegance. The net/http package uses handlers, much like go-pkg-rss does, to off load implementation complexity to outside of the core http package. It also provides batteris included solutions to common problems that developers may have with built in handlers such as a FileServer, a NotFoundHandler, RedirectHandler, StripPrefix and TimeoutHandler. I propose that the current database implementation be stripped from the package and moved to a set of built in handlers.
 
-The developer will then b provided with two powerful options:
+The developer will then be provided with two powerful options:
 
-1) Use the built in deduplication handlers as part of a chain along with their own existing handlers to get the same functionality as currently provided by the existing database implementation.
+1) Use the built in database handlers as part of a chain along with their own existing handlers to get the same functionality as currently provided by the existing database implementation.
 
-2) Roll their own custom handlers which may be inserted into the handler chain. They even have the option of using the provided deduplication handlers if they want.
+2) Roll their own custom handlers which may be inserted into the handler chain. They even have the option of using the provided database handlers if they want.
 
 This opens up exciting possibilities for developers and the future of the go-pkg-rss package. We could add handlers for caching via memcache, a retry count handler for channels, a whitelist/blacklist handler based on item title, a filter handler that strips out items that have a date older than 3 hours, etc.
 
