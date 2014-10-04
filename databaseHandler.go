@@ -1,9 +1,5 @@
 package feeder
 
-import (
-	"fmt"
-)
-
 type databaseHandler struct {
 	db          *database
 	itemhandler ItemHandler
@@ -11,7 +7,6 @@ type databaseHandler struct {
 }
 
 func (d *databaseHandler) ProcessItems(f *Feed, ch *Channel, items []*Item) {
-	fmt.Println("Processing items")
 	var newitems []*Item
 	for _, item := range items {
 		if d.db.request <- item.Key(); !<-d.db.response {
@@ -26,7 +21,6 @@ func (d *databaseHandler) ProcessItems(f *Feed, ch *Channel, items []*Item) {
 }
 
 func (d *databaseHandler) ProcessChannels(f *Feed, ch []*Channel) {
-	fmt.Println("Processing channels")
 	var newchannels []*Channel
 	for _, channel := range ch {
 		if d.db.request <- channel.Key(); !<-d.db.response {

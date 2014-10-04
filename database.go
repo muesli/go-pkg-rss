@@ -3,10 +3,6 @@ Credits go to github.com/SlyMarbo/rss for inspiring this solution.
 */
 package feeder
 
-import (
-	"fmt"
-)
-
 type database struct {
 	request  chan string
 	response chan bool
@@ -20,10 +16,8 @@ func (d *database) Run() {
 	for {
 		s = <-d.request
 		if _, ok := d.known[s]; ok {
-			fmt.Println("Database used: true")
 			d.response <- true
 		} else {
-			fmt.Println("Database used: false")
 			d.response <- false
 			d.known[s] = struct{}{}
 		}
