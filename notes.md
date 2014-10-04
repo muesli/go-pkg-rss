@@ -45,42 +45,4 @@ The developer will then b provided with two powerful options:
 
 This opens up exciting possibilities for developers and the future of the go-pkg-rss package. We could add handlers for caching via memcache, a retry count handler for channels, a whitelist/blacklist handler based on item title, a filter handler that strips out items that have a date older than 3 hours, etc.
 
-    type ChannelHandler interface {
-        func ProcessChannels(f *Feed, newchannels []*Channel)
-    }
-    type ItemHandler interface {
-        func ProcessItems(f *Feed, ch *Channel, newitems []*Item)
-    }
-
-    type ItemCache struct {
-        mc *memcache.Conn
-    }
-    func (ic *ItemCache) ProcessItems(ih rss.ItemHandler) rss.ItemHandler {
-        return func(f *Feed, ch *Channel, newitems []*Item) {
-            for _, v := range newitems {
-                _ := ic.mc.Add(v)
-            }
-            ih(f, ch, newitems)
-        }
-    }
-
-    func (this *Feed) notifyListeners() {
-        var newchannels []*Channel
-        for _, channel := range this.Channels {
-            if this.database.request <- channel.Key(); !<-this.database.response {
-                newchannels = append(newchannels, channel)
-            }
-            var newitems []*Item
-            for _, item := range channel.Items {
-                if this.database.request <- item.Key(); !<-this.database.response {
-                    newitems = append(newitems, item)
-                }
-            }
-            if len(newitems) > 0 && this.itemhandler != nil {
-                this.itemhandler(this, channel, newitems)
-            }
-        }
-        if len(newchannels) > 0 && this.chanhandler != nil {
-            this.chanhandler(this, newchannels)
-        }
-    }
+Whats nice about this approach is that we can recreate a functionally identical approach that means this is backwards compatible with older code that implements the old way of dealing with handlers and duplicate channels and items.
