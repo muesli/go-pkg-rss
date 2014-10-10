@@ -29,6 +29,15 @@ func TestFeed(t *testing.T) {
 	}
 }
 
+func Test_NoHandlers(t *testing.T) {
+	feed := New(1, true, nil, nil)
+	content, _ := ioutil.ReadFile("testdata/initial.atom")
+	err := feed.FetchBytes("http://example.com", content, nil)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func Test_NewItem(t *testing.T) {
 	content, _ := ioutil.ReadFile("testdata/initial.atom")
 	feed := New(1, true, chanHandler, itemHandler)
