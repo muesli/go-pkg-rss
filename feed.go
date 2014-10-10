@@ -46,13 +46,17 @@ func (err *UnsupportedFeedError) Error() string {
 type ChannelHandlerFunc func(f *Feed, newchannels []*Channel)
 
 func (h ChannelHandlerFunc) ProcessChannels(f *Feed, newchannels []*Channel) {
-	h(f, newchannels)
+	if h != nil {
+		h(f, newchannels)
+	}
 }
 
 type ItemHandlerFunc func(f *Feed, ch *Channel, newitems []*Item)
 
 func (h ItemHandlerFunc) ProcessItems(f *Feed, ch *Channel, newitems []*Item) {
-	h(f, ch, newitems)
+	if h != nil {
+		h(f, ch, newitems)
+	}
 }
 
 type Handler interface {
