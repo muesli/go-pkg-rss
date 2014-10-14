@@ -98,7 +98,7 @@ type Feed struct {
 }
 
 // New is a helper function to stay semi-compatible with
-// the old code. Includes the database handlera to ensure
+// the old code. Includes the database handler to ensure
 // that this approach is functionally identical to the
 // old databse/handlers version
 func New(cachetimeout int, enforcecachelimit bool, ch ChannelHandlerFunc, ih ItemHandlerFunc) *Feed {
