@@ -16,8 +16,6 @@ func (d *databaseHandler) ProcessItems(f *Feed, ch *Channel, items []*Item) {
 	if len(newitems) > 0 && d.itemhandler != nil {
 		d.itemhandler.ProcessItems(f, ch, newitems)
 	}
-
-	// No items to process, may as well end here
 }
 
 func (d *databaseHandler) ProcessChannels(f *Feed, ch []*Channel) {
@@ -30,28 +28,18 @@ func (d *databaseHandler) ProcessChannels(f *Feed, ch []*Channel) {
 	if len(newchannels) > 0 && d.chanhandler != nil {
 		d.chanhandler.ProcessChannels(f, newchannels)
 	}
-
-	// No channels to process, may as well end here
 }
 
-func NewDatabaseHandler(handler Handler) Handler {
+func NewDatabaseItemHandler(db *database, itemhandler ItemHandler) ItemHandler {
 	database := new(databaseHandler)
-	database.db = NewDatabase()
-	database.itemhandler = handler
-	database.chanhandler = handler
-	return database
-}
-
-func NewDatabaseItemHandler(itemhandler ItemHandler) ItemHandler {
-	database := new(databaseHandler)
-	database.db = NewDatabase()
+	database.db = db
 	database.itemhandler = itemhandler
 	return database
 }
 
-func NewDatabaseChannelHandler(chanhandler ChannelHandler) ChannelHandler {
+func NewDatabaseChannelHandler(db *database, chanhandler ChannelHandler) ChannelHandler {
 	database := new(databaseHandler)
-	database.db = NewDatabase()
+	database.db = db
 	database.chanhandler = chanhandler
 	return database
 }

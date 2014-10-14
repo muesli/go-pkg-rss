@@ -55,37 +55,12 @@ func (h ItemHandlerFunc) ProcessItems(f *Feed, ch *Channel, newitems []*Item) {
 	h(f, ch, newitems)
 }
 
-type Handler interface {
-	ChannelHandler
-	ItemHandler
-}
-
 type ChannelHandler interface {
 	ProcessChannels(f *Feed, newchannels []*Channel)
 }
 
 type ItemHandler interface {
 	ProcessItems(f *Feed, ch *Channel, newitems []*Item)
-}
-
-type HandlerBonder struct {
-	itemhandler ItemHandler
-	chanhandler ChannelHandler
-}
-
-func (hb *HandlerBonder) ProcessChannels(f *Feed, newchannels []*Channel) {
-	hb.chanhandler.ProcessChannels(f, newchannels)
-}
-
-func (hb *HandlerBonder) ProcessItems(f *Feed, ch *Channel, newitems []*Item) {
-	hb.itemhandler.ProcessItems(f, ch, newitems)
-}
-
-func NewHandlerBonder(chanhandler ChannelHandler, itemhandler ItemHandler) Handler {
-	return &HandlerBonder{
-		itemhandler: itemhandler,
-		chanhandler: chanhandler,
-	}
 }
 
 type Feed struct {
@@ -108,8 +83,14 @@ type Feed struct {
 	// Url from which this feed was created.
 	Url string
 
-	// The channel and item handler
-	handler Handler
+	// Database
+	database *database
+
+	// The channel handler
+	channelHandler ChannelHandler
+
+	// The item handler
+	itemHandler ItemHandler
 
 	// Last time content was fetched. Used in conjunction with CacheTimeout
 	// to ensure we don't get content too often.
@@ -117,21 +98,25 @@ type Feed struct {
 }
 
 // New is a helper function to stay semi-compatible with
-// the old code. Includes the databse handler to ensure
+// the old code. Includes the database handlera to ensure
 // that this approach is functionally identical to the
 // old databse/handlers version
 func New(cachetimeout int, enforcecachelimit bool, ch ChannelHandlerFunc, ih ItemHandlerFunc) *Feed {
-	return NewWithHandler(cachetimeout, enforcecachelimit, NewDatabaseHandler(NewHandlerBonder(ch, ih)))
+	db := NewDatabase()
+	f := NewWithHandlers(cachetimeout, enforcecachelimit, NewDatabaseChannelHandler(db, ch), NewDatabaseItemHandler(db, ih))
+	f.database = db
+	return f
 }
 
-// NewWithHandler creates a new feed with a handler
-// People should use this appraoch from now on
-func NewWithHandler(cachetimeout int, enforcecachelimit bool, h Handler) *Feed {
+// NewWithHandler creates a new feed with handlers
+// People should use this approach from now on
+func NewWithHandlers(cachetimeout int, enforcecachelimit bool, ch ChannelHandler, ih ItemHandler) *Feed {
 	v := new(Feed)
 	v.CacheTimeout = cachetimeout
 	v.EnforceCacheLimit = enforcecachelimit
 	v.Type = "none"
-	v.handler = h
+	v.channelHandler = ch
+	v.itemHandler = ih
 	return v
 }
 
@@ -219,13 +204,13 @@ func (this *Feed) makeFeed(doc *xmlx.Document) (err error) {
 
 func (this *Feed) notifyListeners() {
 	for _, channel := range this.Channels {
-		if len(channel.Items) > 0 && this.handler != nil {
-			this.handler.ProcessItems(this, channel, channel.Items)
+		if len(channel.Items) > 0 && this.itemHandler != nil {
+			this.itemHandler.ProcessItems(this, channel, channel.Items)
 		}
 	}
 
-	if len(this.Channels) > 0 && this.handler != nil {
-		this.handler.ProcessChannels(this, this.Channels)
+	if len(this.Channels) > 0 && this.channelHandler != nil {
+		this.channelHandler.ProcessChannels(this, this.Channels)
 	}
 }
 
