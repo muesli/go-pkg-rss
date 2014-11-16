@@ -2,7 +2,7 @@
 
 The purpose of the database is to ensure that the channel and item
 handlers are only called once for each new channel and each new
-item.It is clear that many users of go-pkg-rss are having problems
+item. It is clear that many users of go-pkg-rss are having problems
 with their channel and item handlers being called multiple times for
 the same items.
 
@@ -30,12 +30,12 @@ The benefits of this include:
 
 2) Zero maintenance: The database is maintence free. There is nothing
    the developer needs to do to take advantage of it. At the same time
-   the developer doesnt need to query it at any time nor do they need
+   the developer doesn't need to query it at any time nor do they need
    to purge items from it. They need not even know it exists.
 
 ### Problems
 
-The problem with the current solution is that it doesnt scale. Time
+The problem with the current solution is that it doesn't scale. Time
 for an example. I'm writing a program that will pull feed urls from a
 queue system to be processed. In order to execute several feed fetches
 at once it may run several hundred go routines, each fetching a feed
@@ -83,10 +83,10 @@ The current database solution contributes the following issues:
    of memory.
 
 3) The database replaces a job that is trivial to implement in a
-   handler: The current database doesnt provide anything that couldnt
-   be developed by a user of the package with ease.
+   handler: The current database doesn't provide anything that
+   couldn't be developed by a user of the package with ease.
 
-4) The database doesnt provide a fine-grained enough key for
+4) The database doesn't provide a fine-grained enough key for
    duplicates: The current version uses a multitude of options for
    item keys and channels, all of which could very easily be falsly
    marked as duplicates. For example, the item title is not a very
@@ -121,7 +121,7 @@ memcache, a retry count handler for channels, a whitelist/blacklist
 handler based on item title, a filter handler that strips out items
 that have a date older than 3 hours, etc.
 
-Whats nice about this approach is that we can recreate a functionally
+What's nice about this approach is that we can recreate a functionally
 identical approach that means this is backwards compatible with older
 code that implements the old way of dealing with handlers and
 duplicate channels and items.
