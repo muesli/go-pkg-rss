@@ -6,7 +6,7 @@ for regular polling of new channels/items.
 
 Build & run with:
 
- $ 6g example.go && 6l example.6 && ./6.out
+ $ go run handlerexample.go
 
 */
 
