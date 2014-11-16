@@ -21,14 +21,14 @@ contain items already processed by the item handler.
 
 The benefits of this include:
 
-1) Batteries included: If the user is creating a program that
+1. Batteries included: If the user is creating a program that
    processes a set of feed urls that it repeatedly polls on an
    existing feed then the built in database provides a "batteries
    included" solution to prevent calling the users channel or item
    handlers unnecessarily, greatly simplifying development of those
    handlers.
 
-2) Zero maintenance: The database is maintence free. There is nothing
+2. Zero maintenance: The database is maintence free. There is nothing
    the developer needs to do to take advantage of it. At the same time
    the developer doesn't need to query it at any time nor do they need
    to purge items from it. They need not even know it exists.
@@ -70,23 +70,23 @@ from constantly refetching a bad feed url.
 
 The current database solution contributes the following issues:
 
-1) The database is too simple: In the above example I need to track
+1. The database is too simple: In the above example I need to track
    (and prevent) the number of fetches I make for article items. I
    also need to allow a number of retry attempts before preventing
    refetches.The current database is not sophisticated enough to
    handle these two different cases at once.
 
-2) The database does expire or clean up entries: I expect my program
+2. The database does expire or clean up entries: I expect my program
    to run for a very long time, processing many thousand feeds and
    even more article urls. The current implementation of the database
    is simple in that it continues to grow indefinately, consuming lots
    of memory.
 
-3) The database replaces a job that is trivial to implement in a
+3. The database replaces a job that is trivial to implement in a
    handler: The current database doesn't provide anything that
    couldn't be developed by a user of the package with ease.
 
-4) The database doesn't provide a fine-grained enough key for
+4. The database doesn't provide a fine-grained enough key for
    duplicates: The current version uses a multitude of options for
    item keys and channels, all of which could very easily be falsly
    marked as duplicates. For example, the item title is not a very
@@ -107,19 +107,23 @@ package and moved to a set of built in handlers.
 
 The developer will then be provided with two powerful options:
 
-1) Use the built in database handlers as part of a chain along with
+1. Use the built in database handlers as part of a chain along with
    their own existing handlers to get the same functionality as
    currently provided by the existing database implementation.
 
-2) Roll their own custom handlers which may be inserted into the
+2. Roll their own custom handlers which may be inserted into the
    handler chain. They even have the option of using the provided
    database handlers if they want.
 
 This opens up exciting possibilities for developers and the future of
-the go-pkg-rss package. We could add handlers for caching via
-memcache, a retry count handler for channels, a whitelist/blacklist
-handler based on item title, a filter handler that strips out items
-that have a date older than 3 hours, etc.
+the go-pkg-rss package. We could add handlers for
+
+- caching via memcache,
+- a retry count handler for channels,
+- a whitelist/blacklist handler based on item title,
+- a filter handler that strips out items that have a date older than 3
+  hours,
+- etc.
 
 What's nice about this approach is that we can recreate a functionally
 identical approach that means this is backwards compatible with older
