@@ -198,18 +198,16 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 				}
 			}
 
-			tl = item.SelectNodes(ns, ns)
 			i.Extensions = make(map[string]map[string][]Extension)
-			for _, lv := range tl {
+			for _, lv := range item.Children {
 				getExtensions(&i.Extensions, lv)
 			}
 
 			ch.Items = append(ch.Items, i)
 		}
 
-		x := node.SelectNodes(ns, ns)
 		ch.Extensions = make(map[string]map[string][]Extension)
-		for _, v := range x {
+		for _, v := range node.Children {
 			if v.Name.Space != "" {
 				getExtensions(&ch.Extensions, v)
 			}
