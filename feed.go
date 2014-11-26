@@ -104,7 +104,7 @@ type Feed struct {
 // New is a helper function to stay semi-compatible with
 // the old code. Includes the database handler to ensure
 // that this approach is functionally identical to the
-// old databse/handlers version.
+// old database/handlers version.
 func New(cachetimeout int, enforcecachelimit bool, ch ChannelHandlerFunc, ih ItemHandlerFunc) *Feed {
 	db := NewDatabase()
 	f := NewWithHandlers(cachetimeout, enforcecachelimit, NewDatabaseChannelHandler(db, ch), NewDatabaseItemHandler(db, ih))
