@@ -170,7 +170,6 @@ func (this *Feed) FetchClient(uri string, client *http.Client, charset xmlx.Char
 // This allows us to specify a custom character encoding conversion
 // routine when dealing with non-utf8 input. Supply 'nil' to use the
 // default from Go's xml package.
-
 func (this *Feed) FetchBytes(uri string, content []byte, charset xmlx.CharsetFunc) (err error) {
 	this.Url = uri
 
