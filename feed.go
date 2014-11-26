@@ -104,7 +104,7 @@ type Feed struct {
 // New is a helper function to stay semi-compatible with
 // the old code. Includes the database handler to ensure
 // that this approach is functionally identical to the
-// old databse/handlers version
+// old database/handlers version.
 func New(cachetimeout int, enforcecachelimit bool, ch ChannelHandlerFunc, ih ItemHandlerFunc) *Feed {
 	db := NewDatabase()
 	f := NewWithHandlers(cachetimeout, enforcecachelimit, NewDatabaseChannelHandler(db, ch), NewDatabaseItemHandler(db, ih))
@@ -112,8 +112,8 @@ func New(cachetimeout int, enforcecachelimit bool, ch ChannelHandlerFunc, ih Ite
 	return f
 }
 
-// NewWithHandler creates a new feed with handlers
-// People should use this approach from now on
+// NewWithHandler creates a new feed with handlers.
+// People should use this approach from now on.
 func NewWithHandlers(cachetimeout int, enforcecachelimit bool, ch ChannelHandler, ih ItemHandler) *Feed {
 	v := new(Feed)
 	v.CacheTimeout = cachetimeout
@@ -170,7 +170,6 @@ func (this *Feed) FetchClient(uri string, client *http.Client, charset xmlx.Char
 // This allows us to specify a custom character encoding conversion
 // routine when dealing with non-utf8 input. Supply 'nil' to use the
 // default from Go's xml package.
-
 func (this *Feed) FetchBytes(uri string, content []byte, charset xmlx.CharsetFunc) (err error) {
 	this.Url = uri
 
