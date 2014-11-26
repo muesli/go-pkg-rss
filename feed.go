@@ -294,15 +294,12 @@ func (this *Feed) testVersions() bool {
 func (this *Feed) GetVersionInfo(doc *xmlx.Document) (ftype string, fversion [2]int) {
 	var node *xmlx.Node
 
-	if node = doc.SelectNode("http://www.w3.org/2005/Atom", "feed"); node == nil {
-		goto rss
+	if node = doc.SelectNode("http://www.w3.org/2005/Atom", "feed"); node != nil {
+		ftype = "atom"
+		fversion = [2]int{1, 0}
+		return
 	}
 
-	ftype = "atom"
-	fversion = [2]int{1, 0}
-	return
-
-rss:
 	if node = doc.SelectNode("", "rss"); node != nil {
 		ftype = "rss"
 		major := 0
