@@ -98,7 +98,7 @@ type Feed struct {
 
 	// Last time content was fetched. Used in conjunction with CacheTimeout
 	// to ensure we don't get content too often.
-	lastupdate int64
+	lastupdate time.Time
 }
 
 // New is a helper function to stay semi-compatible with
@@ -125,8 +125,9 @@ func NewWithHandlers(cachetimeout int, enforcecachelimit bool, ch ChannelHandler
 }
 
 // This returns a timestamp of the last time the feed was updated.
-// The value is in seconds.
-func (this *Feed) LastUpdate() int64 { return this.lastupdate }
+func (this *Feed) LastUpdate() time.Time {
+	return this.lastupdate
+}
 
 // Fetch retrieves the feed's latest content if necessary.
 //
@@ -154,7 +155,7 @@ func (this *Feed) FetchClient(uri string, client *http.Client, charset xmlx.Char
 		return
 	}
 
-	this.lastupdate = time.Now().UTC().UnixNano()
+	this.lastupdate = time.Now().UTC()
 	this.Url = uri
 	doc := xmlx.New()
 
@@ -226,10 +227,11 @@ func (this *Feed) notifyListeners() {
 func (this *Feed) CanUpdate() bool {
 	// Make sure we are not within the specified cache-limit.
 	// This ensures we don't request data too often.
-	utc := time.Now().UTC()
-	if utc.UnixNano()-this.lastupdate < int64(this.CacheTimeout*60) {
+	if SecondsTillUpdate() > 0 {
 		return false
 	}
+
+	utc := time.Now().UTC()
 
 	// If skipDays or skipHours are set in the RSS feed, use these to see if
 	// we can update.
@@ -258,7 +260,13 @@ func (this *Feed) CanUpdate() bool {
 // before the feed should update.
 func (this *Feed) SecondsTillUpdate() int64 {
 	utc := time.Now().UTC()
-	return int64(this.CacheTimeout*60) - (utc.Unix() - (this.lastupdate / 1e9))
+	elapsed := utc.Sub(this.lastupdate)
+	return int64(this.CacheTimeout*60) - int64(elapsed.Seconds())
+}
+
+// Returns the duration needed to elapse before the feed should update.
+func (this *Feed) TillUpdate() (time.Duration, error) {
+	return time.ParseDuration(fmt.Sprintf("%ds", SecondsTillUpdate()))
 }
 
 func (this *Feed) buildFeed(doc *xmlx.Document) (err error) {
