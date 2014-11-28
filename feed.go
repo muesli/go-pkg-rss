@@ -154,6 +154,7 @@ func (this *Feed) FetchClient(uri string, client *http.Client, charset xmlx.Char
 		return
 	}
 
+	this.lastupdate = time.Now().UTC().UnixNano()
 	this.Url = uri
 	doc := xmlx.New()
 
@@ -250,7 +251,6 @@ func (this *Feed) CanUpdate() bool {
 		}
 	}
 
-	this.lastupdate = utc.UnixNano()
 	return true
 }
 
