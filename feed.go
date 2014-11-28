@@ -227,7 +227,7 @@ func (this *Feed) notifyListeners() {
 func (this *Feed) CanUpdate() bool {
 	// Make sure we are not within the specified cache-limit.
 	// This ensures we don't request data too often.
-	if SecondsTillUpdate() > 0 {
+	if this.SecondsTillUpdate() > 0 {
 		return false
 	}
 
@@ -266,7 +266,7 @@ func (this *Feed) SecondsTillUpdate() int64 {
 
 // Returns the duration needed to elapse before the feed should update.
 func (this *Feed) TillUpdate() (time.Duration, error) {
-	return time.ParseDuration(fmt.Sprintf("%ds", SecondsTillUpdate()))
+	return time.ParseDuration(fmt.Sprintf("%ds", this.SecondsTillUpdate()))
 }
 
 func (this *Feed) buildFeed(doc *xmlx.Document) (err error) {
