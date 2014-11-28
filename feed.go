@@ -226,10 +226,11 @@ func (this *Feed) notifyListeners() {
 func (this *Feed) CanUpdate() bool {
 	// Make sure we are not within the specified cache-limit.
 	// This ensures we don't request data too often.
-	utc := time.Now().UTC()
-	if utc.UnixNano()-this.lastupdate < int64(this.CacheTimeout*60) {
+	if SecondsTillUpdate() > 0 {
 		return false
 	}
+
+	utc := time.Now().UTC()
 
 	// If skipDays or skipHours are set in the RSS feed, use these to see if
 	// we can update.
