@@ -264,6 +264,11 @@ func (this *Feed) SecondsTillUpdate() int64 {
 	return int64(this.CacheTimeout*60) - int64(elapsed.Seconds())
 }
 
+// Returns the duration needed to elapse before the feed should update.
+func (this *Feed) TillUpdate() (time.Duration, error) {
+	return time.ParseDuration(fmt.Sprintf("%ds", SecondsTillUpdate()))
+}
+
 func (this *Feed) buildFeed(doc *xmlx.Document) (err error) {
 	switch this.Type {
 	case "rss":
