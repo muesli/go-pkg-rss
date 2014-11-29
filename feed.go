@@ -298,6 +298,8 @@ func (this *Feed) testVersions() bool {
 	return true
 }
 
+// Returns the type of the feed, ie. "atom" or "rss", and the version number as an array.
+// The first item in the array is the major and the second the minor version number.
 func (this *Feed) GetVersionInfo(doc *xmlx.Document) (ftype string, fversion [2]int) {
 	var node *xmlx.Node
 
