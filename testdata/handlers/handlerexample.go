@@ -12,7 +12,7 @@ Build & run with:
 
 import (
 	"fmt"
-	rss "github.com/JalfResi/go-pkg-rss"
+	rss "github.com/jteeuwen/go-pkg-rss"
 	"os"
 	"time"
 )
@@ -26,7 +26,8 @@ func main() {
 
 func PollFeed(uri string, timeout int) {
 
-	feed := rss.NewWithHandler(timeout, true, rss.NewDatabaseHandler(NewMyHandler()))
+	handlers := &MyHandlers{}
+	feed := rss.NewWithHandlers(timeout, true, handlers, handlers)
 
 	for {
 		if err := feed.Fetch(uri, nil); err != nil {
@@ -38,22 +39,12 @@ func PollFeed(uri string, timeout int) {
 	}
 }
 
-/*
-func itemHandler(feed *rss.Feed, ch *rss.Channel, newitems []*rss.Item) {
-	fmt.Printf("%d new item(s) in %s\n", len(newitems), feed.Url)
-}
-*/
+type MyHandlers struct{}
 
-type MyHandler struct{}
-
-func NewMyHandler() rss.Handler {
-	return &MyHandler{}
-}
-
-func (m *MyHandler) ProcessChannels(feed *rss.Feed, newchannels []*rss.Channel) {
+func (m *MyHandlers) ProcessChannels(feed *rss.Feed, newchannels []*rss.Channel) {
 	fmt.Printf("%d new channel(s) in %s\n", len(newchannels), feed.Url)
 }
 
-func (m *MyHandler) ProcessItems(feed *rss.Feed, ch *rss.Channel, newitems []*rss.Item) {
+func (m *MyHandlers) ProcessItems(feed *rss.Feed, ch *rss.Channel, newitems []*rss.Item) {
 	fmt.Printf("%d new rad item(s) in %s\n", len(newitems), feed.Url)
 }
