@@ -27,11 +27,12 @@ package feeder
 
 import (
 	"fmt"
-	xmlx "github.com/jteeuwen/go-pkg-xmlx"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	xmlx "github.com/jteeuwen/go-pkg-xmlx"
 )
 
 type UnsupportedFeedError struct {
@@ -99,6 +100,10 @@ type Feed struct {
 	// Last time content was fetched. Used in conjunction with CacheTimeout
 	// to ensure we don't get content too often.
 	lastupdate time.Time
+
+	// On our next fetch *ONLY* (this will get reset to false afterwards),
+	// ignore all cache settings and update frequency hints, and always fetch.
+	ignoreCacheOnce bool
 }
 
 // New is a helper function to stay semi-compatible with
@@ -127,6 +132,13 @@ func NewWithHandlers(cachetimeout int, enforcecachelimit bool, ch ChannelHandler
 // This returns a timestamp of the last time the feed was updated.
 func (this *Feed) LastUpdate() time.Time {
 	return this.lastupdate
+}
+
+// Until the next *successful* fetching of the feed's content, the
+// fetcher will ignore all cache values and update interval hints,
+// and always attempt to retrieve a fresh copy of the feed.
+func (this *Feed) IgnoreCacheOnce() {
+	this.ignoreCacheOnce = true
 }
 
 // Fetch retrieves the feed's latest content if necessary.
@@ -163,7 +175,12 @@ func (this *Feed) FetchClient(uri string, client *http.Client, charset xmlx.Char
 		return
 	}
 
-	return this.makeFeed(doc)
+	if err = this.makeFeed(doc); err == nil {
+		// Only if fetching and parsing succeeded.
+		this.ignoreCacheOnce = false
+	}
+
+	return
 }
 
 // Fetch retrieves the feed's content from the []byte
@@ -225,6 +242,13 @@ func (this *Feed) notifyListeners() {
 // true). If this function returns true, you can be sure that a fresh feed
 // update will be performed.
 func (this *Feed) CanUpdate() bool {
+	if this.ignoreCacheOnce {
+		// Even though ignoreCacheOnce is only good for one fetch, we only reset
+		// it after a successful fetch, so CanUpdate() has no side-effects, and
+		// can be called repeatedly before performing the actual fetch.
+		return true
+	}
+
 	// Make sure we are not within the specified cache-limit.
 	// This ensures we don't request data too often.
 	if this.SecondsTillUpdate() > 0 {
