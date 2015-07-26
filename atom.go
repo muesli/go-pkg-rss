@@ -56,7 +56,8 @@ func (this *Feed) readAtom(doc *xmlx.Document) (err error) {
 			i = new(Item)
 			i.Title = item.S(ns, "title")
 			i.Id = item.S(ns, "id")
-			i.PubDate = item.S(ns, "updated")
+			i.PubDate = item.S(ns, "published")
+			i.Updated = item.S(ns, "updated")
 			i.Description = item.S(ns, "summary")
 
 			links := item.SelectNodes(ns, "link")
