@@ -24,6 +24,7 @@ type Item struct {
 	Generator    *Generator
 	Contributors []string
 	Content      *Content
+	Updated      string
 
 	Extensions map[string]map[string][]Extension
 }
