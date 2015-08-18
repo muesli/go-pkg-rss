@@ -102,6 +102,9 @@ func (this *Feed) readRss2(doc *xmlx.Document) (err error) {
 		if n = node.SelectNode(ns, "image"); n != nil {
 			ch.Image.Title = n.S(ns, "title")
 			ch.Image.Url = n.S(ns, "url")
+			if ch.Image.Url == "" {
+				ch.Image.Url = n.As(ns, "href")
+			}
 			ch.Image.Link = n.S(ns, "link")
 			ch.Image.Width = n.I(ns, "width")
 			ch.Image.Height = n.I(ns, "height")
