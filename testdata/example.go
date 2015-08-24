@@ -37,7 +37,7 @@ func PollFeed(uri string, timeout int, cr xmlx.CharsetFunc) {
 
 	for {
 		if err := feed.Fetch(uri, cr); err != nil {
-			fmt.Fprintf(os.Stderr, "[e] %s: %s", uri, err)
+			fmt.Fprintf(os.Stderr, "[e] %s: %s\n", uri, err)
 			return
 		}
 
