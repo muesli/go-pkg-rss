@@ -25,7 +25,7 @@ The Feed object supports notifications of new channels and items.
 This is achieved by passing 2 function handlers to the feeder.New() function.
 They will be called whenever a feed is updated from the remote source and
 either a new channel or a new item is found that previously did not exist.
-This allows you to easily monitor a feed for changes. See src/feed_test.go for
+This allows you to easily monitor a feed for changes. See feed_test.go for
 an example of how this works.
 
 ## DEPENDENCIES
