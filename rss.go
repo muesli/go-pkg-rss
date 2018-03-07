@@ -1,7 +1,7 @@
 package feeder
 
 import (
-	xmlx "github.com/jteeuwen/go-pkg-xmlx"
+	xmlx "github.com/muesli/go-pkg-xmlx"
 )
 
 type MissingRssNodeError struct{}
