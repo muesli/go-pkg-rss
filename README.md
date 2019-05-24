@@ -30,10 +30,10 @@ an example of how this works.
 
 ## DEPENDENCIES
 
-[github.com/jteeuwen/go-pkg-xmlx](http://github.com/jteeuwen/go-pkg-xmlx)
+[github.com/muesli/go-pkg-xmlx](http://github.com/muesli/go-pkg-xmlx)
 
 ## USAGE
 
 
-An idiomatic example program can be found in [testdata/example.go](https://github.com/jteeuwen/go-pkg-rss/blob/master/testdata/example.go).
+An idiomatic example program can be found in [testdata/example.go](https://github.com/muesli/go-pkg-rss/blob/master/testdata/example.go).
 
